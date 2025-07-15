@@ -20,11 +20,11 @@
   backdrop-filter: var(--blur);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-}
+  }
 
 .glow-effect {
   box-shadow: var(--shadow-glow);
-}
+  }
 
 /* Responsive utilities */
 @media (max-width: 768px) {

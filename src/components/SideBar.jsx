@@ -1,6 +1,6 @@
 import React from 'react'
-import styled from 'styled-components'
-import { FiHome, FiPieChart, FiCreditCard, FiTrendingUp, FiDollarSign, FiTarget, FiBarChart2, FiSettings } from 'react-icons/fi'
+import styled, { css } from 'styled-components'
+import { FiHome, FiPieChart, FiCreditCard, FiTrendingUp, FiDollarSign, FiTarget, FiBarChart2, FiSettings, FiX } from 'react-icons/fi'
 
 const SidebarContainer = styled.aside`
   width: var(--sidebar);
@@ -11,20 +11,89 @@ const SidebarContainer = styled.aside`
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 200;
-  padding: var(--xl) 0;
+  z-index: 1200;
+  padding: var(--lg) 0;
   overflow-y: auto;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+
+  @media (max-width: 768px) {
+    width: 80vw;
+    max-width: 320px;
+    transform: translateX(-100%);
+    ${(props) => props.isMobile && css`
+      transform: translateX(0);
+    `}
+  }
+`;
+
+const Overlay = styled.div`
+  display: none;
+  @media (max-width: 768px) {
+    display: ${(props) => (props.isMobile ? 'block' : 'none')};
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    z-index: 1199;
+    transition: opacity 0.3s;
+  }
+`;
+
+const CloseButton = styled.button`
+  display: none;
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: none;
+    border: none;
+    color: var(--text-white);
+    font-size: 1.5rem;
+    padding: var(--sm);
+    cursor: pointer;
+    margin-left: auto;
+  }
+`;
+
+const AvatarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--lg);
+`;
+
+const Avatar = styled.div`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
+  margin-bottom: var(--xs);
+`;
+
+const AvatarName = styled.div`
+  color: var(--text-white);
+  font-size: 0.9rem;
+  font-weight: 600;
 `;
 
 const SidebarHeader = styled.div`
-  padding: 0 var(--lg);
-  margin-bottom: var(--xl);
+  padding: 0 var(--md);
+  margin-bottom: var(--lg);
 `;
 
 const BrandName = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -33,22 +102,22 @@ const BrandName = styled.h2`
 
 const BrandSubtitle = styled.p`
   color: var(--text-gray);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   margin: 0;
 `;
 
 const NavSection = styled.div`
-  margin-bottom: var(--xl);
+  margin-bottom: var(--lg);
 `;
 
 const SectionTitle = styled.h3`
   color: var(--text-gray);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 0 var(--lg);
-  margin-bottom: var(--md);
+  padding: 0 var(--md);
+  margin-bottom: var(--sm);
 `;
 
 const NavList = styled.ul`
@@ -64,14 +133,14 @@ const NavItem = styled.li`
 const NavLink = styled.a`
   display: flex;
   align-items: center;
-  gap: var(--md);
-  padding: var(--md) var(--lg);
+  gap: var(--sm);
+  padding: var(--sm) var(--md);
   color: var(--text-light);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
   border-radius: 0 var(--radius) var(--radius) 0;
-  margin-right: var(--lg);
+  margin-right: var(--md);
   transition: var(--transition);
   position: relative;
   
@@ -82,10 +151,10 @@ const NavLink = styled.a`
   }
   
   &.active {
-    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-    color: var(--bg-dark);
-    font-weight: 600;
-    box-shadow: var(--shadow-glow);
+    background: linear-gradient(90deg, rgba(0,230,118,0.18) 0%, rgba(0,230,118,0.10) 100%);
+    color: var(--primary-green);
+    font-weight: 700;
+    box-shadow: 0 0 8px 0 var(--primary-green);
     
     &::before {
       content: '';
@@ -101,8 +170,8 @@ const NavLink = styled.a`
 `;
 
 const NavIcon = styled.div`
-  font-size: 1.2rem;
-  width: 20px;
+  font-size: 1rem;
+  width: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,43 +192,7 @@ const Badge = styled.span`
   text-align: center;
 `;
 
-const SidebarFooter = styled.div`
-  padding: var(--lg);
-  border-top: 1px solid var(--border);
-  margin-top: auto;
-`;
-
-const QuickStats = styled.div`
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--md);
-  margin-bottom: var(--md);
-`;
-
-const QuickStatItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--sm);
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
-
-const QuickStatLabel = styled.span`
-  color: var(--text-gray);
-  font-size: 0.8rem;
-`;
-
-const QuickStatValue = styled.span`
-  color: var(--primary-green);
-  font-weight: 600;
-  font-size: 0.9rem;
-`;
-
-const SideBar = () => {
+const SideBar = ({ isMobile, onClose }) => {
   const mainNavItems = [
     { icon: FiHome, text: 'Dashboard', active: true },
     { icon: FiPieChart, text: 'Overview' },
@@ -175,62 +208,49 @@ const SideBar = () => {
   ]
 
   return (
-    <SidebarContainer>
-      <SidebarHeader>
-        <BrandName>BudgetTracker</BrandName>
-        <BrandSubtitle>Financial Freedom</BrandSubtitle>
-      </SidebarHeader>
-
-      <NavSection>
-        <SectionTitle>Main Menu</SectionTitle>
-        <NavList>
-          {mainNavItems.map((item, index) => (
-            <NavItem key={index}>
-              <NavLink href="#" className={item.active ? 'active' : ''}>
-                <NavIcon>
-                  <item.icon />
-                </NavIcon>
-                <NavText>{item.text}</NavText>
-              </NavLink>
-            </NavItem>
-          ))}
-        </NavList>
-      </NavSection>
-
-      <NavSection>
-        <SectionTitle>Financial Tools</SectionTitle>
-        <NavList>
-          {financialNavItems.map((item, index) => (
-            <NavItem key={index}>
-              <NavLink href="#">
-                <NavIcon>
-                  <item.icon />
-                </NavIcon>
-                <NavText>{item.text}</NavText>
-                {item.badge && <Badge>{item.badge}</Badge>}
-              </NavLink>
-            </NavItem>
-          ))}
-        </NavList>
-      </NavSection>
-
-      <SidebarFooter>
-        <QuickStats>
-          <QuickStatItem>
-            <QuickStatLabel>Monthly Budget</QuickStatLabel>
-            <QuickStatValue>$4,200</QuickStatValue>
-          </QuickStatItem>
-          <QuickStatItem>
-            <QuickStatLabel>Spent</QuickStatLabel>
-            <QuickStatValue>$2,850</QuickStatValue>
-          </QuickStatItem>
-          <QuickStatItem>
-            <QuickStatLabel>Remaining</QuickStatLabel>
-            <QuickStatValue>$1,350</QuickStatValue>
-          </QuickStatItem>
-        </QuickStats>
-      </SidebarFooter>
-    </SidebarContainer>
+    <>
+      <Overlay isMobile={isMobile} onClick={onClose} />
+      <SidebarContainer isMobile={isMobile}>
+        <CloseButton onClick={onClose} aria-label="Close sidebar">
+          <FiX />
+        </CloseButton>
+        <SidebarHeader>
+          <BrandName>BudgetTracker</BrandName>
+          <BrandSubtitle>Financial Freedom</BrandSubtitle>
+        </SidebarHeader>
+        <NavSection>
+          <SectionTitle>Main Menu</SectionTitle>
+          <NavList>
+            {mainNavItems.map((item, index) => (
+              <NavItem key={index}>
+                <NavLink href="#" className={item.active ? 'active' : ''}>
+                  <NavIcon>
+                    <item.icon />
+                  </NavIcon>
+                  <NavText>{item.text}</NavText>
+                </NavLink>
+              </NavItem>
+            ))}
+          </NavList>
+        </NavSection>
+        <NavSection>
+          <SectionTitle>Financial Tools</SectionTitle>
+          <NavList>
+            {financialNavItems.map((item, index) => (
+              <NavItem key={index}>
+                <NavLink href="#">
+                  <NavIcon>
+                    <item.icon />
+                  </NavIcon>
+                  <NavText>{item.text}</NavText>
+                  {item.badge && <Badge>{item.badge}</Badge>}
+                </NavLink>
+              </NavItem>
+            ))}
+          </NavList>
+        </NavSection>
+      </SidebarContainer>
+    </>
   )
 }
 

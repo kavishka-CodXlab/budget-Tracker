@@ -1,35 +1,35 @@
 :root {
-  /* Green Money Theme Colors */
-  --primary-green: #00d4aa;
-  --primary-green-dark: #00b894;
-  --primary-green-light: #00f5d4;
-  --secondary-green: #00f2c3;
-  --accent-green: #00e676;
-  --success-green: #4caf50;
-  --warning-orange: #ff9800;
-  --danger-red: #f44336;
+  /* Green Web3 Theme Colors */
+  --primary-green: #00e676;
+  --primary-green-dark: #009e60;
+  --primary-green-light: #69f0ae;
+  --secondary-green: #1de9b6;
+  --accent-green: #00bfae;
+  --success-green: #00e676;
+  --warning-orange: #fbbf24;
+  --danger-red: #ef4444;
   
   /* Background Colors */
-  --bg-dark: #0a0e1a;
-  --bg-darker: #050a12;
-  --bg-card: rgba(0, 212, 170, 0.05);
-  --bg-glass: rgba(0, 212, 170, 0.1);
-  --bg-gradient: linear-gradient(135deg, #0a0e1a 0%, #0d1424 50%, #0a0e1a 100%);
-  --card-gradient: linear-gradient(135deg, rgba(0, 212, 170, 0.1) 0%, rgba(0, 242, 195, 0.05) 100%);
+  --bg-dark: #10151c; /* 60%: main background, very dark */
+  --bg-darker: #0a0e14; /* even darker for contrast */
+  --bg-card: #181e25; /* 30%: neutral/gray for cards */
+  --bg-glass: rgba(24, 30, 37, 0.85); /* glassy, neutral/dark */
+  --bg-gradient: linear-gradient(135deg, #10151c 0%, #181e25 50%, #10151c 100%);
+  --card-gradient: linear-gradient(135deg, rgba(24, 30, 37, 0.95) 0%, rgba(16, 21, 28, 0.93) 100%);
   
   /* Text Colors */
   --text-white: #ffffff;
   --text-light: #e0e6ed;
-  --text-gray: #8892a0;
+  --text-gray: #94a3b8;
   --text-muted: #64748b;
-  --text-green: #00d4aa;
+  --text-green: #00e676;
   
   /* Border & Shadow */
-  --border: rgba(0, 212, 170, 0.2);
-  --border-light: rgba(0, 212, 170, 0.1);
-  --shadow: rgba(0, 212, 170, 0.15);
-  --shadow-card: 0 8px 32px rgba(0, 212, 170, 0.1);
-  --shadow-glow: 0 0 20px rgba(0, 212, 170, 0.3);
+  --border: rgba(36, 255, 164, 0.08); /* subtle green tint */
+  --border-light: rgba(255,255,255,0.04);
+  --shadow: rgba(0,0,0,0.18);
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-glow: 0 0 20px rgba(0, 230, 118, 0.10);
   
   /* Spacing */
   --xs: 0.25rem;
@@ -41,16 +41,16 @@
   
   /* Border Radius */
   --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   
   /* Transitions */
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.15s ease;
   
   /* Blur Effects */
-  --blur: blur(20px);
+  --blur: blur(32px);
   
   /* Layout */
   --sidebar: 280px;
@@ -132,7 +132,7 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-green);
-  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.10);
 }
 
 /* Glass Effect */

@@ -1,204 +1,142 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
-import { FiBell, FiUser, FiSettings, FiTrendingUp } from 'react-icons/fi'
+import { FiLogOut, FiSun, FiMenu, FiMoon } from 'react-icons/fi'
 
 const HeaderContainer = styled.header`
   width: 100%;
-  height: var(--header-height);
-  background: var(--card-gradient);
+  height: 72px;
+  background: var(--bg-glass);
   backdrop-filter: var(--blur);
+  color: #fff;
+  display: flex;  
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1300;
   border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px 0 var(--shadow);
+  opacity: 1;
+  transition: background 0.3s;
+
+  @media (max-width: 768px) {
+    height: 56px;
+    top: 0;
+    padding: 0 1rem;
+  }
+`;
+
+const HeaderContent = styled.div`
+  width: 100%;
+  max-width: 1200px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--xl);
-  position: fixed;
-  top: 0;
-  left: var(--sidebar);
-  right: 0;
-  z-index: 100;
-  box-shadow: var(--shadow-card);
+  @media (max-width: 768px) {
+    padding: 0 0.5rem;
+  }
 `;
 
-const LogoSection = styled.div`
+const Left = styled.div`
   display: flex;
   align-items: center;
   gap: var(--md);
 `;
 
-const Logo = styled.div`
+const MenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  color: var(--primary-green);
+  font-size: 2rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: var(--md);
+  @media (max-width: 768px) {
+    display: flex;
+  }
+`;
+
+const Avatar = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  font-size: 1.5rem;
+  justify-content: center;
+  font-size: 1.1rem;
   font-weight: 700;
+  color: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
+`;
+
+const AvatarName = styled.div`
   color: var(--text-white);
+  font-size: 1rem;
+  font-weight: 600;
 `;
 
-const LogoIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: var(--bg-dark);
-  box-shadow: var(--shadow-glow);
+const LogoImg = styled.img`
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--bg-card);
+  box-shadow: 0 2px 8px 0 var(--shadow);
 `;
 
-const LogoText = styled.span`
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-`;
-
-const Tagline = styled.span`
-  color: var(--text-gray);
-  font-size: 0.9rem;
-  font-weight: 400;
-`;
-
-const HeaderActions = styled.div`
+const Actions = styled.div`
   display: flex;
   align-items: center;
   gap: var(--md);
 `;
 
-const NotificationButton = styled.button`
-  width: 40px;
-  height: 40px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-gray);
-  cursor: pointer;
-  transition: var(--transition);
-  position: relative;
-  
-  &:hover {
-    color: var(--primary-green);
-    border-color: var(--primary-green);
-    transform: translateY(-2px);
-  }
-`;
-
-const NotificationBadge = styled.div`
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: var(--danger-red);
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  padding: var(--sm);
   border-radius: 50%;
-  border: 2px solid var(--bg-dark);
-`;
-
-const UserSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--md);
-  padding: var(--sm) var(--md);
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   cursor: pointer;
-  transition: var(--transition);
-  
-  &:hover {
-    border-color: var(--primary-green);
-    transform: translateY(-2px);
-  }
-`;
-
-const UserAvatar = styled.div`
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-  border-radius: 50%;
+  transition: background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--bg-dark);
-  font-weight: 600;
-  font-size: 0.9rem;
-`;
-
-const UserInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
-
-const UserName = styled.span`
-  font-weight: 600;
-  color: var(--text-white);
-  font-size: 0.9rem;
-`;
-
-const UserRole = styled.span`
-  color: var(--text-gray);
-  font-size: 0.8rem;
-`;
-
-const SettingsButton = styled.button`
-  width: 40px;
-  height: 40px;
-  background: var(--bg-glass);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-gray);
-  cursor: pointer;
-  transition: var(--transition);
-  
   &:hover {
+    background: var(--bg-glass);
     color: var(--primary-green);
-    border-color: var(--primary-green);
-    transform: translateY(-2px);
   }
 `;
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
+  const [toggleBtn,setToggleBtn] = useState(false);
   return (
     <HeaderContainer>
-      <LogoSection>
-        <Logo>
-          <LogoIcon>
-            <FiTrendingUp />
-          </LogoIcon>
-          <div>
-            <LogoText>BudgetTracker</LogoText>
-            <Tagline>Smart Financial Management</Tagline>
-          </div>
-        </Logo>
-      </LogoSection>
-      
-      <HeaderActions>
-        <NotificationButton>
-          <FiBell />
-          <NotificationBadge />
-        </NotificationButton>
-        
-        <UserSection>
-          <UserAvatar>JD</UserAvatar>
-          <UserInfo>
-            <UserName>John Doe</UserName>
-            <UserRole>Premium User</UserRole>
-          </UserInfo>
-        </UserSection>
-        
-        <SettingsButton>
-          <FiSettings />
-        </SettingsButton>
-      </HeaderActions>
+      <HeaderContent>
+        <Left>
+          <MenuButton onClick={onMenuClick} aria-label="Open sidebar menu">
+            <FiMenu />
+          </MenuButton>
+          <Avatar>BT</Avatar>
+          <AvatarName>Budget User</AvatarName>
+        </Left>
+        <Actions>
+          <IconButton title="Toggle theme" onClick={()=>{
+            setToggleBtn(!toggleBtn);
+            console.log("toggleBtn",toggleBtn); 
+          }}>
+            {toggleBtn ? <FiMoon /> : <FiSun />}  
+          </IconButton>
+          <IconButton title="Log out">
+            <FiLogOut />
+          </IconButton>
+        </Actions>
+      </HeaderContent>
     </HeaderContainer>
   )
 }
