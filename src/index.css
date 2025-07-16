@@ -195,3 +195,79 @@ input:focus, select:focus, textarea:focus {
   h2 { font-size: 1.75rem; }
   h3 { font-size: 1.25rem; }
 }
+/* LoginForm.css - Budget Tracker Theme */
+.login-form-container {
+  background: #181c20; /* 60% dark */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form {
+  background: rgba(34, 40, 49, 0.95); /* 30% neutral, glassy effect */
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-form h2 {
+  background: linear-gradient(90deg, #00ff99, #00c16e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.login-form label {
+  color: #e0e0e0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-form input {
+  background: #23272f;
+  border: 1.5px solid #00ff99; /* 10% green accent */
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.login-form input:focus {
+  border-color: #00c16e;
+}
+
+.login-form button {
+  background: linear-gradient(90deg, #00ff99, #00c16e);
+  color: #181c20;
+  font-weight: 700;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-top: 1rem;
+}
+
+.login-form button:hover {
+  background: linear-gradient(90deg, #00c16e, #00ff99);
+  color: #fff;
+}
+
+@media (max-width: 500px) {
+  .login-form {
+    padding: 1.5rem 1rem;
+    max-width: 95vw;
+  }
+}
