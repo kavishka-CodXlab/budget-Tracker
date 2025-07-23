@@ -1,256 +1,203 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
-import { FiHome, FiPieChart, FiCreditCard, FiTrendingUp, FiDollarSign, FiTarget, FiBarChart2, FiSettings, FiX } from 'react-icons/fi'
+import styled from 'styled-components'
+import { NavLink } from 'react-router-dom'
+import { 
+  FiHome, 
+  FiCreditCard, 
+  FiTarget, 
+  FiBarChart3, 
+  FiTrendingUp, 
+  FiSettings,
+  FiX
+} from 'react-icons/fi'
 
 const SidebarContainer = styled.aside`
-  width: var(--sidebar);
-  height: 100vh;
-  background: var(--card-gradient);
-  backdrop-filter: var(--blur);
-  border-right: 1px solid var(--border);
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1200;
-  padding: var(--lg) 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-primary);
+  z-index: 999;
+  transform: translateX(${props => props.isOpen ? '0' : '-100%'});
+  transition: transform var(--transition-normal);
   overflow-y: auto;
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-
-  @media (max-width: 768px) {
-    width: 80vw;
-    max-width: 320px;
-    transform: translateX(-100%);
-    ${(props) => props.isMobile && css`
-      transform: translateX(0);
-    `}
-  }
-`;
-
-const Overlay = styled.div`
-  display: none;
-  @media (max-width: 768px) {
-    display: ${(props) => (props.isMobile ? 'block' : 'none')};
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
+  
+  @media (min-width: 769px) {
+    transform: translateX(0);
+    position: relative;
     height: 100vh;
-    background: rgba(0,0,0,0.4);
-    z-index: 1199;
-    transition: opacity 0.3s;
   }
-`;
+`
+
+const SidebarHeader = styled.div`
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 70px;
+`
 
 const CloseButton = styled.button`
-  display: none;
-  @media (max-width: 768px) {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    background: none;
-    border: none;
-    color: var(--text-white);
-    font-size: 1.5rem;
-    padding: var(--sm);
-    cursor: pointer;
-    margin-left: auto;
-  }
-`;
-
-const AvatarContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: var(--lg);
-`;
-
-const Avatar = styled.div`
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
-  margin-bottom: var(--xs);
-`;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  
+  &:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+`
 
-const AvatarName = styled.div`
-  color: var(--text-white);
-  font-size: 0.9rem;
+const SidebarTitle = styled.h2`
+  color: var(--text-primary);
+  font-size: 1.125rem;
   font-weight: 600;
-`;
-
-const SidebarHeader = styled.div`
-  padding: 0 var(--md);
-  margin-bottom: var(--lg);
-`;
-
-const BrandName = styled.h2`
-  font-size: 1.1rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: var(--xs);
-`;
-
-const BrandSubtitle = styled.p`
-  color: var(--text-gray);
-  font-size: 0.8rem;
   margin: 0;
-`;
+`
+
+const Navigation = styled.nav`
+  padding: var(--space-lg);
+`
 
 const NavSection = styled.div`
-  margin-bottom: var(--lg);
-`;
+  margin-bottom: var(--space-xl);
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`
 
 const SectionTitle = styled.h3`
-  color: var(--text-gray);
-  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 0 var(--md);
-  margin-bottom: var(--sm);
-`;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-md);
+  padding: 0 var(--space-md);
+`
 
 const NavList = styled.ul`
   list-style: none;
-  padding: 0;
   margin: 0;
-`;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+`
 
 const NavItem = styled.li`
-  margin-bottom: var(--xs);
-`;
+  margin: 0;
+`
 
-const NavLink = styled.a`
+const StyledNavLink = styled(NavLink)`
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  padding: var(--sm) var(--md);
-  color: var(--text-light);
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.95rem;
   font-weight: 500;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  margin-right: var(--md);
-  transition: var(--transition);
-  position: relative;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
   
   &:hover {
-    background: var(--bg-glass);
-    color: var(--primary-green);
-    transform: translateX(4px);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
   }
   
   &.active {
-    background: linear-gradient(90deg, rgba(0,230,118,0.18) 0%, rgba(0,230,118,0.10) 100%);
-    color: var(--primary-green);
-    font-weight: 700;
-    box-shadow: 0 0 8px 0 var(--primary-green);
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
+    font-weight: 600;
     
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--primary-green);
-      border-radius: 0 2px 2px 0;
+    svg {
+      color: var(--accent-primary);
     }
   }
-`;
+  
+  svg {
+    flex-shrink: 0;
+    color: inherit;
+  }
+`
 
-const NavIcon = styled.div`
-  font-size: 1rem;
-  width: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const NavText = styled.span`
-  flex: 1;
-`;
-
-const Badge = styled.span`
-  background: var(--danger-red);
-  color: var(--text-white);
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 18px;
-  text-align: center;
-`;
-
-const SideBar = ({ isMobile, onClose }) => {
-  const mainNavItems = [
-    { icon: FiHome, text: 'Dashboard', active: true },
-    { icon: FiPieChart, text: 'Overview' },
-    { icon: FiCreditCard, text: 'Transactions' },
-    { icon: FiTrendingUp, text: 'Analytics' }
-  ]
-
-  const financialNavItems = [
-    { icon: FiDollarSign, text: 'Income', badge: '3' },
-    { icon: FiTarget, text: 'Goals' },
-    { icon: FiBarChart2, text: 'Reports' },
-    { icon: FiSettings, text: 'Settings' }
+const SideBar = ({ isOpen, onClose }) => {
+  const navigationItems = [
+    {
+      section: 'Overview',
+      items: [
+        { to: '/', icon: FiHome, label: 'Dashboard' },
+        { to: '/transactions', icon: FiCreditCard, label: 'Transactions' },
+      ]
+    },
+    {
+      section: 'Planning',
+      items: [
+        { to: '/budget', icon: FiTarget, label: 'Budget' },
+        { to: '/goals', icon: FiTrendingUp, label: 'Goals' },
+      ]
+    },
+    {
+      section: 'Analytics',
+      items: [
+        { to: '/analytics', icon: FiBarChart3, label: 'Analytics' },
+      ]
+    },
+    {
+      section: 'Settings',
+      items: [
+        { to: '/settings', icon: FiSettings, label: 'Settings' },
+      ]
+    }
   ]
 
   return (
-    <>
-      <Overlay isMobile={isMobile} onClick={onClose} />
-      <SidebarContainer isMobile={isMobile}>
-        <CloseButton onClick={onClose} aria-label="Close sidebar">
-          <FiX />
+    <SidebarContainer isOpen={isOpen}>
+      <SidebarHeader>
+        <SidebarTitle>Navigation</SidebarTitle>
+        <CloseButton onClick={onClose}>
+          <FiX size={16} />
         </CloseButton>
-        <SidebarHeader>
-          <BrandName>BudgetTracker</BrandName>
-          <BrandSubtitle>Financial Freedom</BrandSubtitle>
-        </SidebarHeader>
-        <NavSection>
-          <SectionTitle>Main Menu</SectionTitle>
-          <NavList>
-            {mainNavItems.map((item, index) => (
-              <NavItem key={index}>
-                <NavLink href="#" className={item.active ? 'active' : ''}>
-                  <NavIcon>
-                    <item.icon />
-                  </NavIcon>
-                  <NavText>{item.text}</NavText>
-                </NavLink>
-              </NavItem>
-            ))}
-          </NavList>
-        </NavSection>
-        <NavSection>
-          <SectionTitle>Financial Tools</SectionTitle>
-          <NavList>
-            {financialNavItems.map((item, index) => (
-              <NavItem key={index}>
-                <NavLink href="#">
-                  <NavIcon>
-                    <item.icon />
-                  </NavIcon>
-                  <NavText>{item.text}</NavText>
-                  {item.badge && <Badge>{item.badge}</Badge>}
-                </NavLink>
-              </NavItem>
-            ))}
-          </NavList>
-        </NavSection>
-      </SidebarContainer>
-    </>
+      </SidebarHeader>
+      
+      <Navigation>
+        {navigationItems.map((section, index) => (
+          <NavSection key={index}>
+            <SectionTitle>{section.section}</SectionTitle>
+            <NavList>
+              {section.items.map((item) => (
+                <NavItem key={item.to}>
+                  <StyledNavLink 
+                    to={item.to} 
+                    onClick={onClose}
+                    end={item.to === '/'}
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                  </StyledNavLink>
+                </NavItem>
+              ))}
+            </NavList>
+          </NavSection>
+        ))}
+      </Navigation>
+    </SidebarContainer>
   )
 }
 

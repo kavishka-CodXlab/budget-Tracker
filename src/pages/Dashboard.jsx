@@ -1,344 +1,417 @@
 import React from 'react'
 import styled from 'styled-components'
-import PageLayout from '../layouts/Layout'
-import { FiTrendingUp, FiTrendingDown, FiDollarSign, FiCreditCard, FiArrowUpRight, FiArrowDownRight } from 'react-icons/fi'
+import Layout from '../layouts/Layout'
+import { useAppContext } from '../context/AppContext'
+import { 
+  FiTrendingUp, 
+  FiTrendingDown, 
+  FiDollarSign, 
+  FiTarget,
+  FiCreditCard,
+  FiPieChart,
+  FiPlus,
+  FiArrowRight
+} from 'react-icons/fi'
 
 const DashboardContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
-`;
+  gap: var(--space-2xl);
+`
 
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--lg);
-  margin-bottom: var(--xl);
-`;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+`
 
 const StatCard = styled.div`
-  background: var(--card-gradient);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  color: var(--text-white);
-  box-shadow: var(--shadow-card);
-  transition: var(--transition);
+  padding: var(--space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
-`;
-
-const StatHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--lg);
-`;
+`
 
 const StatIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  background: ${props => props.type === 'income' ? 'linear-gradient(135deg, var(--success-green), var(--accent-green))' :
-                props.type === 'expense' ? 'linear-gradient(135deg, var(--danger-red), var(--warning-orange))' :
-                'linear-gradient(135deg, var(--primary-green), var(--secondary-green))'};
-  border-radius: var(--radius);
+  width: 56px;
+  height: 56px;
+  background-color: ${props => props.color || 'var(--accent-primary-light)'};
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: var(--text-white);
-  box-shadow: var(--shadow-glow);
-`;
+  color: ${props => props.textColor || 'var(--accent-primary)'};
+  flex-shrink: 0;
+`
 
-const StatTrend = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--xs);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: ${props => props.trend === 'up' ? 'var(--success-green)' : 'var(--danger-red)'};
-`;
+const StatInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`
 
-const StatAmount = styled.div`
-  font-size: 2.5rem;
+const StatValue = styled.div`
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--text-white);
-  margin-bottom: var(--sm);
-`;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+  line-height: 1;
+`
 
 const StatLabel = styled.div`
-  color: var(--text-gray);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-`;
+`
 
-const StatDescription = styled.div`
-  color: var(--text-light);
-  font-size: 0.9rem;
-  margin-top: var(--sm);
-`;
-
-const ContentGrid = styled.div`
+const QuickActionsGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--xl);
-  
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-`;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
+`
 
-const ChartSection = styled.div`
-  background: var(--card-gradient);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
+const QuickActionCard = styled.div`
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  box-shadow: var(--shadow-card);
-`;
+  padding: var(--space-xl);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+  }
+`
 
-const SectionTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-white);
-  margin-bottom: var(--lg);
-`;
+const QuickActionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+`
 
-const ChartPlaceholder = styled.div`
-  height: 300px;
-  background: var(--bg-glass);
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
+const QuickActionIcon = styled.div`
+  width: 40px;
+  height: 40px;
+  background-color: var(--accent-primary-light);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-gray);
-  font-size: 1.1rem;
-`;
+  font-size: 1.25rem;
+  color: var(--accent-primary);
+`
 
-const TransactionsSection = styled.div`
-  background: var(--card-gradient);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
+const ActionTitle = styled.h3`
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+`
+
+const ActionDescription = styled.p`
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0 0 var(--space-md) 0;
+  line-height: 1.5;
+`
+
+const ActionButton = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  
+  svg {
+    transition: transform var(--transition-fast);
+  }
+  
+  ${QuickActionCard}:hover & svg {
+    transform: translateX(4px);
+  }
+`
+
+const RecentSection = styled.div`
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  box-shadow: var(--shadow-card);
-`;
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+`
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+`
+
+const SectionTitle = styled.h2`
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+`
+
+const ViewAllButton = styled.button`
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    color: var(--accent-primary-hover);
+  }
+`
+
+const TransactionsList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+`
 
 const TransactionItem = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--md);
-  padding: var(--md) 0;
-  border-bottom: 1px solid var(--border-light);
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-tertiary);
+  transition: all var(--transition-fast);
   
-  &:last-child {
-    border-bottom: none;
+  &:hover {
+    background-color: var(--bg-secondary);
   }
-`;
+`
 
 const TransactionIcon = styled.div`
   width: 40px;
   height: 40px;
-  background: ${props => props.type === 'income' ? 'var(--success-green)' : 'var(--danger-red)'};
-  border-radius: 50%;
+  background-color: ${props => props.type === 'income' ? 'var(--success-light)' : 'var(--danger-light)'};
+  color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-white);
-  font-size: 1rem;
-`;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+`
 
 const TransactionInfo = styled.div`
   flex: 1;
-`;
+  min-width: 0;
+`
 
 const TransactionTitle = styled.div`
+  color: var(--text-primary);
   font-weight: 600;
-  color: var(--text-white);
-  margin-bottom: var(--xs);
-`;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-xs);
+`
 
-const TransactionDate = styled.div`
-  color: var(--text-gray);
-  font-size: 0.8rem;
-`;
+const TransactionCategory = styled.div`
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+`
 
 const TransactionAmount = styled.div`
-  font-weight: 600;
-  color: ${props => props.type === 'income' ? 'var(--success-green)' : 'var(--danger-red)'};
-  font-size: 1.1rem;
-`;
+  color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: right;
+`
 
-const QuickActions = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--lg);
-  margin-top: var(--xl);
-`;
-
-const ActionCard = styled.div`
-  background: var(--card-gradient);
-  backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--lg);
+const EmptyState = styled.div`
   text-align: center;
-  cursor: pointer;
-  transition: var(--transition);
+  padding: var(--space-3xl) var(--space-xl);
+  color: var(--text-secondary);
   
-  &:hover {
-    transform: translateY(-2px);
-    border-color: var(--primary-green);
-    box-shadow: var(--shadow-glow);
+  svg {
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
   }
-`;
-
-const ActionIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto var(--md);
-  font-size: 1.5rem;
-  color: var(--bg-dark);
-`;
-
-const ActionTitle = styled.div`
-  font-weight: 600;
-  color: var(--text-white);
-  margin-bottom: var(--xs);
-`;
-
-const ActionDescription = styled.div`
-  color: var(--text-gray);
-  font-size: 0.9rem;
-`;
+`
 
 const Dashboard = () => {
-  const stats = [
+  const { state } = useAppContext()
+
+  // Mock data for demonstration
+  const mockTransactions = [
+    { id: 1, title: 'Salary Payment', amount: 4200, type: 'income', category: 'Salary', date: '2024-01-15' },
+    { id: 2, title: 'Grocery Shopping', amount: 85.50, type: 'expense', category: 'Food & Dining', date: '2024-01-14' },
+    { id: 3, title: 'Freelance Work', amount: 750, type: 'income', category: 'Freelance', date: '2024-01-13' },
+    { id: 4, title: 'Gas Station', amount: 45.20, type: 'expense', category: 'Transportation', date: '2024-01-12' },
+    { id: 5, title: 'Coffee Shop', amount: 12.50, type: 'expense', category: 'Food & Dining', date: '2024-01-11' }
+  ]
+
+  const transactions = state.transactions.length > 0 ? state.transactions : mockTransactions
+  const recentTransactions = transactions.slice(0, 5)
+
+  // Calculate stats
+  const totalIncome = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+  
+  const totalExpenses = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
+  
+  const netBalance = totalIncome - totalExpenses
+  const totalTransactions = transactions.length
+
+  const quickActions = [
     {
-      type: 'income',
-      amount: '$8,420',
-      label: 'Total Income',
-      description: 'This month',
-      trend: 'up',
-      percentage: '+12.5%',
-      icon: FiTrendingUp
+      icon: FiPlus,
+      title: 'Add Transaction',
+      description: 'Record a new income or expense',
+      action: () => console.log('Add transaction')
     },
     {
-      type: 'expense',
-      amount: '$5,280',
-      label: 'Total Expenses',
-      description: 'This month',
-      trend: 'down',
-      percentage: '-8.2%',
-      icon: FiTrendingDown
+      icon: FiTarget,
+      title: 'Set Budget',
+      description: 'Create or update your monthly budget',
+      action: () => console.log('Set budget')
     },
     {
-      type: 'balance',
-      amount: '$3,140',
-      label: 'Net Balance',
-      description: 'Available funds',
-      trend: 'up',
-      percentage: '+15.3%',
-      icon: FiDollarSign
+      icon: FiTrendingUp,
+      title: 'View Analytics',
+      description: 'Analyze your spending patterns',
+      action: () => console.log('View analytics')
     },
     {
-      type: 'savings',
-      amount: '$12,850',
-      label: 'Total Savings',
-      description: 'All time',
-      trend: 'up',
-      percentage: '+22.1%',
-      icon: FiCreditCard
+      icon: FiCreditCard,
+      title: 'All Transactions',
+      description: 'View complete transaction history',
+      action: () => console.log('View transactions')
     }
   ]
 
-  const recentTransactions = [
-    { id: 1, title: 'Salary Payment', amount: '+$4,200', type: 'income', date: 'Today', icon: '💰' },
-    { id: 2, title: 'Grocery Shopping', amount: '-$85.50', type: 'expense', date: 'Yesterday', icon: '🛒' },
-    { id: 3, title: 'Freelance Work', amount: '+$750', type: 'income', date: '2 days ago', icon: '💼' },
-    { id: 4, title: 'Gas Station', amount: '-$45.20', type: 'expense', date: '3 days ago', icon: '⛽' },
-    { id: 5, title: 'Online Purchase', amount: '-$120', type: 'expense', date: '4 days ago', icon: '🛍️' }
-  ]
-
-  const quickActions = [
-    { title: 'Add Transaction', description: 'Record new income or expense', icon: '➕' },
-    { title: 'Set Budget', description: 'Create spending limits', icon: '📊' },
-    { title: 'View Reports', description: 'Analyze your finances', icon: '📈' },
-    { title: 'Set Goals', description: 'Plan for the future', icon: '🎯' }
-  ]
-
   return (
-    <PageLayout title="Financial Dashboard">
+    <Layout title="Dashboard">
       <DashboardContainer>
+        {/* Stats Overview */}
         <StatsGrid>
-          {stats.map((stat, index) => (
-            <StatCard key={index}>
-              <StatHeader>
-                <StatIcon type={stat.type}>
-                  <stat.icon />
-                </StatIcon>
-                <StatTrend trend={stat.trend}>
-                  {stat.trend === 'up' ? <FiArrowUpRight /> : <FiArrowDownRight />}
-                  {stat.percentage}
-                </StatTrend>
-              </StatHeader>
-              <StatAmount>{stat.amount}</StatAmount>
-              <StatLabel>{stat.label}</StatLabel>
-              <StatDescription>{stat.description}</StatDescription>
-            </StatCard>
-          ))}
+          <StatCard>
+            <StatIcon color="var(--success-light)" textColor="var(--success)">
+              <FiTrendingUp />
+            </StatIcon>
+            <StatInfo>
+              <StatValue>${totalIncome.toFixed(2)}</StatValue>
+              <StatLabel>Total Income</StatLabel>
+            </StatInfo>
+          </StatCard>
+
+          <StatCard>
+            <StatIcon color="var(--danger-light)" textColor="var(--danger)">
+              <FiTrendingDown />
+            </StatIcon>
+            <StatInfo>
+              <StatValue>${totalExpenses.toFixed(2)}</StatValue>
+              <StatLabel>Total Expenses</StatLabel>
+            </StatInfo>
+          </StatCard>
+
+          <StatCard>
+            <StatIcon color="var(--accent-primary-light)" textColor="var(--accent-primary)">
+              <FiDollarSign />
+            </StatIcon>
+            <StatInfo>
+              <StatValue style={{ color: netBalance >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+                ${netBalance.toFixed(2)}
+              </StatValue>
+              <StatLabel>Net Balance</StatLabel>
+            </StatInfo>
+          </StatCard>
+
+          <StatCard>
+            <StatIcon color="var(--info-light)" textColor="var(--info)">
+              <FiPieChart />
+            </StatIcon>
+            <StatInfo>
+              <StatValue>{totalTransactions}</StatValue>
+              <StatLabel>Total Transactions</StatLabel>
+            </StatInfo>
+          </StatCard>
         </StatsGrid>
 
-        <ContentGrid>
-          <ChartSection>
-            <SectionTitle>Spending Overview</SectionTitle>
-            <ChartPlaceholder>
-              📊 Interactive Chart Coming Soon
-            </ChartPlaceholder>
-          </ChartSection>
-
-          <TransactionsSection>
-            <SectionTitle>Recent Transactions</SectionTitle>
-            {recentTransactions.map(transaction => (
-              <TransactionItem key={transaction.id}>
-                <TransactionIcon type={transaction.type}>
-                  {transaction.icon}
-                </TransactionIcon>
-                <TransactionInfo>
-                  <TransactionTitle>{transaction.title}</TransactionTitle>
-                  <TransactionDate>{transaction.date}</TransactionDate>
-                </TransactionInfo>
-                <TransactionAmount type={transaction.type}>
-                  {transaction.amount}
-                </TransactionAmount>
-              </TransactionItem>
-            ))}
-          </TransactionsSection>
-        </ContentGrid>
-
-        <QuickActions>
+        {/* Quick Actions */}
+        <QuickActionsGrid>
           {quickActions.map((action, index) => (
-            <ActionCard key={index}>
-              <ActionIcon>{action.icon}</ActionIcon>
-              <ActionTitle>{action.title}</ActionTitle>
+            <ActionCard key={index} onClick={action.action}>
+              <ActionHeader>
+                <ActionIcon>
+                  <action.icon />
+                </ActionIcon>
+                <ActionTitle>{action.title}</ActionTitle>
+              </ActionHeader>
               <ActionDescription>{action.description}</ActionDescription>
+              <ActionButton>
+                Get started <FiArrowRight />
+              </ActionButton>
             </ActionCard>
           ))}
-        </QuickActions>
+        </QuickActionsGrid>
+
+        {/* Recent Transactions */}
+        <RecentSection>
+          <SectionHeader>
+            <SectionTitle>Recent Transactions</SectionTitle>
+            <ViewAllButton>
+              View all <FiArrowRight />
+            </ViewAllButton>
+          </SectionHeader>
+
+          {recentTransactions.length > 0 ? (
+            <TransactionsList>
+              {recentTransactions.map(transaction => (
+                <TransactionItem key={transaction.id}>
+                  <TransactionIcon type={transaction.type}>
+                    {transaction.type === 'income' ? <FiTrendingUp /> : <FiTrendingDown />}
+                  </TransactionIcon>
+                  <TransactionInfo>
+                    <TransactionTitle>{transaction.title}</TransactionTitle>
+                    <TransactionCategory>{transaction.category}</TransactionCategory>
+                  </TransactionInfo>
+                  <TransactionAmount type={transaction.type}>
+                    {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                  </TransactionAmount>
+                </TransactionItem>
+              ))}
+            </TransactionsList>
+          ) : (
+            <EmptyState>
+              <FiCreditCard size={48} />
+              <div>No transactions yet</div>
+              <div style={{ fontSize: '0.875rem', marginTop: 'var(--space-xs)' }}>
+                Start by adding your first transaction
+              </div>
+            </EmptyState>
+          )}
+        </RecentSection>
       </DashboardContainer>
-    </PageLayout>
+    </Layout>
   )
 }
 

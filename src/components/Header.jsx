@@ -1,142 +1,124 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { FiLogOut, FiSun, FiMenu, FiMoon } from 'react-icons/fi'
+import { FiMenu, FiSun, FiMoon, FiDollarSign } from 'react-icons/fi'
+import { useTheme } from '../context/ThemeContext'
 
 const HeaderContainer = styled.header`
-  width: 100%;
-  height: 72px;
-  background: var(--bg-glass);
-  backdrop-filter: var(--blur);
-  color: #fff;
-  display: flex;  
-  align-items: center;
-  justify-content: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1300;
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 2px 12px 0 var(--shadow);
-  opacity: 1;
-  transition: background 0.3s;
-
-  @media (max-width: 768px) {
-    height: 56px;
-    top: 0;
-    padding: 0 1rem;
-  }
-`;
-
-const HeaderContent = styled.div`
-  width: 100%;
-  max-width: 1200px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--xl);
-  @media (max-width: 768px) {
-    padding: 0 0.5rem;
-  }
-`;
+  padding: 0 var(--space-xl);
+  height: 70px;
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-primary);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: all var(--transition-normal);
+`
 
-const Left = styled.div`
+const LeftSection = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--md);
-`;
+  gap: var(--space-lg);
+`
 
 const MenuButton = styled.button`
-  display: none;
-  background: none;
-  border: none;
-  color: var(--primary-green);
-  font-size: 2rem;
+  display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  margin-right: var(--md);
-  @media (max-width: 768px) {
-    display: flex;
-  }
-`;
-
-const Avatar = styled.div`
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);
-`;
-
-const AvatarName = styled.div`
-  color: var(--text-white);
-  font-size: 1rem;
-  font-weight: 600;
-`;
-
-const LogoImg = styled.img`
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: var(--bg-card);
-  box-shadow: 0 2px 8px 0 var(--shadow);
-`;
-
-const Actions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--md);
-`;
-
-const IconButton = styled.button`
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.5rem;
-  padding: var(--sm);
-  border-radius: 50%;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
   cursor: pointer;
-  transition: background 0.2s;
+  
+  &:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+  
+  @media (min-width: 769px) {
+    display: none;
+  }
+`
+
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  
+  svg {
+    color: var(--accent-primary);
+  }
+`
+
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+`
+
+const ThemeToggle = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  
   &:hover {
-    background: var(--bg-glass);
-    color: var(--primary-green);
+    background-color: var(--accent-primary-light);
+    color: var(--accent-primary);
   }
-`;
+`
+
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
+`
 
 const Header = ({ onMenuClick }) => {
-  const [toggleBtn,setToggleBtn] = useState(false);
+  const { isDark, toggleTheme } = useTheme()
+
   return (
     <HeaderContainer>
-      <HeaderContent>
-        <Left>
-          <MenuButton onClick={onMenuClick} aria-label="Open sidebar menu">
-            <FiMenu />
-          </MenuButton>
-          <Avatar>BT</Avatar>
-          <AvatarName>Budget User</AvatarName>
-        </Left>
-        <Actions>
-          <IconButton title="Toggle theme" onClick={()=>{
-            setToggleBtn(!toggleBtn);
-            console.log("toggleBtn",toggleBtn); 
-          }}>
-            {toggleBtn ? <FiMoon /> : <FiSun />}  
-          </IconButton>
-          <IconButton title="Log out">
-            <FiLogOut />
-          </IconButton>
-        </Actions>
-      </HeaderContent>
+      <LeftSection>
+        <MenuButton onClick={onMenuClick}>
+          <FiMenu size={20} />
+        </MenuButton>
+        
+        <Logo>
+          <FiDollarSign size={24} />
+          Budget Tracker
+        </Logo>
+      </LeftSection>
+
+      <RightSection>
+        <ThemeToggle onClick={toggleTheme} title={`Switch to ${isDark ? 'light' : 'dark'} theme`}>
+          {isDark ? <FiSun size={18} /> : <FiMoon size={18} />}
+        </ThemeToggle>
+        
+        <UserSection>
+          Personal Finance
+        </UserSection>
+      </RightSection>
     </HeaderContainer>
   )
 }
