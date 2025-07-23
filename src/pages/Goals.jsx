@@ -1,49 +1,49 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiPlus, FiTarget, FiTrendingUp, FiCalendar, FiDollarSign, FiEdit3, FiTrash2, FiCheck } from 'react-icons/fi';
-import PageLayout from '../layouts/Layout';
+import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
 
 const GoalsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
+  gap: var(--space-2xl);
 `;
 
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--lg);
-  margin-bottom: var(--xl);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
 `;
 
 const StatCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
   display: flex;
   align-items: center;
-  gap: var(--md);
-  box-shadow: var(--shadow-light);
-  transition: var(--transition);
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
   &:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-light);
+    box-shadow: var(--shadow-md);
   }
 `;
 
 const StatIcon = styled.div`
   width: 50px;
   height: 50px;
-  background: ${props => props.color || 'var(--accent-green-light)'};
-  border-radius: var(--radius);
+  background-color: ${props => props.color || 'var(--accent-primary-light)'};
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: ${props => props.textColor || 'var(--accent-green-dark)'};
+  color: ${props => props.textColor || 'var(--accent-primary)'};
 `;
 
 const StatInfo = styled.div`
@@ -51,43 +51,43 @@ const StatInfo = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-main-light);
-  margin-bottom: var(--xs);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
 `;
 
 const StatLabel = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const ActionsBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: var(--md);
+    gap: var(--space-lg);
     align-items: stretch;
   }
 `;
 
 const ActionButton = styled.button`
-  background: var(--accent-green);
-  color: var(--bg-card-light);
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: var(--sm);
+  gap: var(--space-sm);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
 `;
@@ -95,19 +95,19 @@ const ActionButton = styled.button`
 const GoalsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--xl);
+  gap: var(--space-2xl);
 `;
 
 const GoalCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  box-shadow: var(--shadow-light);
-  transition: var(--transition);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-light);
+    box-shadow: var(--shadow-md);
   }
 `;
 
@@ -115,7 +115,7 @@ const GoalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
 `;
 
 const GoalInfo = styled.div`
@@ -123,87 +123,87 @@ const GoalInfo = styled.div`
 `;
 
 const GoalTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: var(--xs);
+  margin-bottom: var(--space-xs);
 `;
 
 const GoalDescription = styled.p`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
-  margin-bottom: var(--sm);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-sm);
 `;
 
 const GoalMeta = styled.div`
   display: flex;
-  gap: var(--lg);
-  margin-bottom: var(--md);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-lg);
 `;
 
 const MetaItem = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--xs);
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  gap: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const GoalActions = styled.div`
   display: flex;
-  gap: var(--sm);
+  gap: var(--space-sm);
 `;
 
 const IconButton = styled.button`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--sm);
-  color: var(--text-secondary-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    color: var(--accent-green-dark);
-    border-color: var(--accent-green);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
   }
 `;
 
 const ProgressSection = styled.div`
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
 `;
 
 const ProgressHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--sm);
+  margin-bottom: var(--space-sm);
 `;
 
 const ProgressLabel = styled.div`
-  color: var(--text-main-light);
+  color: var(--text-primary);
   font-weight: 600;
 `;
 
 const ProgressPercentage = styled.div`
-  color: var(--accent-green);
+  color: var(--accent-primary);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 `;
 
 const ProgressBar = styled.div`
   width: 100%;
   height: 12px;
-  background: var(--bg-sidebar-light);
+  background-color: var(--bg-tertiary);
   border-radius: 6px;
   overflow: hidden;
-  margin-bottom: var(--sm);
+  margin-bottom: var(--space-sm);
 `;
 
 const ProgressFill = styled.div`
   height: 100%;
-  background: var(--accent-green);
+  background-color: var(--accent-primary);
   width: ${props => Math.min(props.percentage, 100)}%;
-  transition: var(--transition);
+  transition: all var(--transition-normal);
   position: relative;
 `;
 
@@ -211,65 +211,65 @@ const ProgressText = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 `;
 
 const CurrentAmount = styled.span`
-  color: var(--text-main-light);
+  color: var(--text-primary);
   font-weight: 600;
 `;
 
 const TargetAmount = styled.span`
-  color: var(--text-secondary-light);
+  color: var(--text-secondary);
 `;
 
 const TimeRemaining = styled.div`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--sm) var(--md);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
   text-align: center;
-  margin-top: var(--md);
+  margin-top: var(--space-lg);
 `;
 
 const TimeLabel = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.8rem;
-  margin-bottom: var(--xs);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  margin-bottom: var(--space-xs);
 `;
 
 const TimeValue = styled.div`
-  color: var(--text-main-light);
+  color: var(--text-primary);
   font-weight: 600;
 `;
 
 const StatusBadge = styled.div`
-  background: ${props => {
+  background-color: ${props => {
     switch (props.status) {
-      case 'completed': return 'var(--success-green)';
-      case 'in-progress': return 'var(--accent-green)';
-      case 'overdue': return 'var(--danger-red)';
-      default: return 'var(--text-secondary-light)';
+      case 'completed': return 'var(--success)';
+      case 'in-progress': return 'var(--accent-primary)';
+      case 'overdue': return 'var(--danger)';
+      default: return 'var(--text-secondary)';
     }
   }};
-  color: var(--bg-card-light);
-  padding: var(--xs) var(--sm);
+  color: var(--text-inverse);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 `;
 
 const EmptyState = styled.div`
   grid-column: 1 / -1;
   text-align: center;
-  padding: var(--xxl);
-  color: var(--text-secondary-light);
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 // Modal styles
@@ -279,128 +279,128 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background-color: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  padding: var(--md);
+  padding: var(--space-lg);
 `;
 
 const Modal = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
+  padding: var(--space-2xl);
   width: 100%;
   max-width: 500px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-lg);
 `;
 
 const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
 `;
 
 const ModalTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: var(--text-secondary-light);
+  color: var(--text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   &:hover {
-    color: var(--text-main-light);
+    color: var(--text-primary);
   }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xs);
+  gap: var(--space-xs);
 `;
 
 const Label = styled.label`
-  color: var(--text-main-light);
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
   font-weight: 500;
 `;
 
 const Input = styled.input`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
 `;
 
 const Textarea = styled.textarea`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   min-height: 80px;
   resize: vertical;
   font-family: inherit;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
 `;
 
 const ErrorText = styled.div`
-  color: var(--danger-red);
-  font-size: 0.8rem;
-  margin-top: var(--xs);
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: var(--space-xs);
 `;
 
 const FormActions = styled.div`
   display: flex;
-  gap: var(--md);
-  margin-top: var(--lg);
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
 `;
 
 const SubmitButton = styled.button`
-  background: var(--accent-green);
-  color: var(--bg-card-light);
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   flex: 1;
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
   &:disabled {
@@ -411,17 +411,17 @@ const SubmitButton = styled.button`
 `;
 
 const CancelButton = styled.button`
-  background: var(--bg-sidebar-light);
-  color: var(--text-main-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    border-color: var(--accent-green);
-    color: var(--accent-green-dark);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
   }
 `;
 
@@ -633,12 +633,12 @@ const Goals = () => {
   };
 
   return (
-    <PageLayout title="Financial Goals">
+    <Layout title="Financial Goals">
       <GoalsContainer>
         {/* Statistics */}
         <StatsGrid>
           <StatCard>
-            <StatIcon color="var(--accent-green-light)" textColor="var(--accent-green-dark)">
+            <StatIcon color="var(--accent-primary-light)" textColor="var(--accent-primary)">
               <FiTarget />
             </StatIcon>
             <StatInfo>
@@ -648,7 +648,7 @@ const Goals = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--success-green)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--success-light)" textColor="var(--success)">
               <FiCheck />
             </StatIcon>
             <StatInfo>
@@ -658,7 +658,7 @@ const Goals = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--warning-orange)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--warning-light)" textColor="var(--warning)">
               <FiDollarSign />
             </StatIcon>
             <StatInfo>
@@ -668,7 +668,7 @@ const Goals = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="#8b5cf6" textColor="var(--bg-card-light)">
+            <StatIcon color="#8b5cf6" textColor="var(--text-inverse)">
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>
@@ -680,7 +680,7 @@ const Goals = () => {
 
         {/* Actions Bar */}
         <ActionsBar>
-          <h2 style={{ color: 'var(--text-main-light)', margin: 0 }}>Your Goals</h2>
+          <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Your Goals</h2>
           <ActionButton onClick={() => setShowModal(true)}>
             <FiPlus />
             Add Goal
@@ -863,7 +863,7 @@ const Goals = () => {
           </ModalOverlay>
         )}
       </GoalsContainer>
-    </PageLayout>
+    </Layout>
   );
 };
 

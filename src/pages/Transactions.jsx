@@ -1,32 +1,33 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import styled from 'styled-components'
-import PageLayout from '../layouts/Layout'
+import Layout from '../layouts/Layout'
 import { useAppContext } from '../context/AppContext'
 import useForm from '../hooks/useForm'
 import useDebounce from '../hooks/useDebounce'
-import { FiFilter, FiSearch, FiDownload, FiPlus, FiEdit3, FiTrash2, FiCalendar, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCreditCard } from 'react-icons/fi'
+import Tooltip from '../components/Tooltip'
+import { FiFilter, FiSearch, FiDownload, FiPlus, FiEdit3, FiTrash2, FiCalendar, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCreditCard, FiCheckCircle, FiXCircle, FiCopy } from 'react-icons/fi'
 
 const TransactionsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
+  gap: var(--space-2xl);
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: var(--md);
+    gap: var(--space-lg);
     align-items: stretch;
   }
 `;
 
 const SearchSection = styled.div`
   display: flex;
-  gap: var(--md);
+  gap: var(--space-lg);
   align-items: center;
   @media (max-width: 768px) {
     flex-direction: column;
@@ -36,73 +37,56 @@ const SearchSection = styled.div`
 
 const SearchInput = styled.input`
   width: 300px;
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
-  font-size: 0.95rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
+  font-size: 0.875rem;
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   @media (max-width: 768px) {
     width: 100%;
   }
 `;
 
-const FilterButton = styled.button`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-secondary-light);
-  display: flex;
-  align-items: center;
-  gap: var(--sm);
-  cursor: pointer;
-  transition: var(--transition);
-  &:hover {
-    border-color: var(--accent-green);
-    color: var(--accent-green-dark);
-  }
-`;
-
 const FilterSelect = styled.select`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   cursor: pointer;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
+    border-color: var(--accent-primary);
   }
   option {
-    background: var(--bg-card-light);
-    color: var(--text-main-light);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 
 const ActionButton = styled.button`
-  background: var(--accent-green);
+  background-color: var(--accent-primary);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
-  color: var(--bg-card-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
+  color: var(--text-inverse);
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: var(--sm);
+  gap: var(--space-sm);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
 `;
@@ -110,53 +94,53 @@ const ActionButton = styled.button`
 const StatsCards = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--lg);
-  margin-bottom: var(--xl);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
 `;
 
 const StatCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
   text-align: center;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-sm);
 `;
 
 const StatNumber = styled.div`
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-main-light);
-  margin-bottom: var(--xs);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
 `;
 
 const StatLabel = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
 `;
 
 const TransactionsTable = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-sm);
 `;
 
 const TableHeader = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr 100px;
-  gap: var(--md);
-  padding: var(--lg) var(--xl);
-  background: var(--bg-sidebar-light);
-  border-bottom: 1px solid var(--border-light);
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
   font-weight: 600;
-  color: var(--text-secondary-light);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 1px;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
   @media (max-width: 768px) {
     grid-template-columns: 2fr 1fr 100px;
     > div:nth-child(3),
@@ -170,12 +154,12 @@ const TableHeader = styled.div`
 const TableRow = styled.div`
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr 1fr 100px;
-  gap: var(--md);
-  padding: var(--lg) var(--xl);
-  border-bottom: 1px solid var(--border-light);
-  transition: var(--transition);
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border-primary);
+  transition: all var(--transition-fast);
   &:hover {
-    background: var(--bg-sidebar-light);
+    background-color: var(--bg-tertiary);
   }
   &:last-child {
     border-bottom: none;
@@ -193,20 +177,20 @@ const TableRow = styled.div`
 const TransactionCell = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  color: var(--text-main-light);
+  gap: var(--space-sm);
+  color: var(--text-primary);
 `;
 
 const TransactionIcon = styled.div`
   width: 32px;
   height: 32px;
-  background: ${props => props.type === 'income' ? 'var(--success-green)' : 'var(--danger-red)'};
+  background-color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  color: var(--bg-card-light);
+  font-size: 0.875rem;
+  color: var(--text-inverse);
 `;
 
 const TransactionInfo = styled.div`
@@ -217,77 +201,77 @@ const TransactionInfo = styled.div`
 
 const TransactionTitle = styled.div`
   font-weight: 600;
-  color: var(--text-main-light);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
 const TransactionCategory = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
 `;
 
 const TransactionAmount = styled.div`
   font-weight: 600;
-  color: ${props => props.type === 'income' ? 'var(--success-green)' : 'var(--danger-red)'};
+  color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
   text-align: right;
 `;
 
 const TransactionDate = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const CategoryBadge = styled.span`
-  background: var(--accent-green-light);
-  color: var(--accent-green-dark);
-  padding: var(--xs) var(--sm);
+  background-color: var(--accent-primary-light);
+  color: var(--accent-primary);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 const StatusBadge = styled.span`
-  background: ${props => props.status === 'completed' ? 'var(--success-green)' : 
-                props.status === 'pending' ? 'var(--warning-orange)' : 'var(--danger-red)'};
-  color: var(--bg-card-light);
-  padding: var(--xs) var(--sm);
+  background-color: ${props => props.status === 'completed' ? 'var(--success)' : 
+                props.status === 'pending' ? 'var(--warning)' : 'var(--danger)'};
+  color: var(--text-inverse);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 500;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: var(--xs);
+  gap: var(--space-xs);
 `;
 
 const IconButton = styled.button`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--xs);
-  color: var(--text-secondary-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   display: flex;
   align-items: center;
   justify-content: center;
   &:hover {
-    color: var(--accent-green-dark);
-    border-color: var(--accent-green);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
   }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: var(--xxl);
-  color: var(--text-secondary-light);
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 // Modal styles
@@ -297,170 +281,178 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background-color: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  padding: var(--md);
+  padding: var(--space-lg);
 `;
 
 const Modal = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
+  padding: var(--space-2xl);
   width: 100%;
   max-width: 500px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-lg);
 `;
 
 const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
 `;
 
 const ModalTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: var(--text-secondary-light);
+  color: var(--text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   &:hover {
-    color: var(--text-main-light);
+    color: var(--text-primary);
   }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xs);
+  gap: var(--space-xs);
 `;
 
 const Label = styled.label`
-  color: var(--text-main-light);
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
   font-weight: 500;
 `;
 
 const Input = styled.input`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
+  }
+  &:invalid {
+    border-color: var(--danger);
+    box-shadow: none;
+  }
+  &:valid {
+    border-color: var(--success);
+    box-shadow: none;
   }
 `;
 
 const Select = styled.select`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
+    border-color: var(--accent-primary);
   }
   option {
-    background: var(--bg-card-light);
-    color: var(--text-main-light);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 
 const Textarea = styled.textarea`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   min-height: 80px;
   resize: vertical;
   font-family: inherit;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
+    border-color: var(--accent-primary);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
 `;
 
 const TypeToggle = styled.div`
   display: flex;
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
   overflow: hidden;
 `;
 
 const TypeOption = styled.button`
   flex: 1;
-  padding: var(--md);
-  background: ${props => props.active ? 'var(--accent-green)' : 'transparent'};
-  color: ${props => props.active ? 'var(--bg-card-light)' : 'var(--text-main-light)'};
+  padding: var(--space-md);
+  background-color: ${props => props.active ? 'var(--accent-primary)' : 'transparent'};
+  color: ${props => props.active ? 'var(--text-inverse)' : 'var(--text-primary)'};
   border: none;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   font-weight: ${props => props.active ? '600' : '400'};
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--xs);
+  gap: var(--space-xs);
   &:hover {
-    background: ${props => props.active ? 'var(--accent-green)' : 'var(--accent-green-light)'};
-    color: ${props => props.active ? 'var(--bg-card-light)' : 'var(--accent-green-dark)'};
+    background-color: ${props => props.active ? 'var(--accent-primary)' : 'var(--accent-primary-light)'};
+    color: ${props => props.active ? 'var(--text-inverse)' : 'var(--accent-primary)'};
   }
 `;
 
 const ErrorText = styled.div`
-  color: var(--danger-red);
-  font-size: 0.8rem;
+  color: var(--danger);
+  font-size: 0.75rem;
 `;
 
 const FormActions = styled.div`
   display: flex;
-  gap: var(--md);
-  margin-top: var(--lg);
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
 `;
 
 const SubmitButton = styled.button`
-  background: var(--accent-green);
-  color: var(--bg-card-light);
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   flex: 1;
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
   &:disabled {
@@ -471,17 +463,17 @@ const SubmitButton = styled.button`
 `;
 
 const CancelButton = styled.button`
-  background: var(--bg-sidebar-light);
-  color: var(--text-main-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    border-color: var(--accent-green);
-    color: var(--accent-green-dark);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
   }
 `;
 
@@ -492,6 +484,23 @@ const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const searchInputRef = useRef();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'n' || e.key === 'N') {
+        setShowModal(true);
+      }
+      if (e.key === '/') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Debounce search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -656,40 +665,57 @@ const Transactions = () => {
     actions.addNotification('Transactions exported successfully!', 'success');
   };
 
+  // Copy to clipboard
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    actions.addNotification('Copied to clipboard!', 'success');
+  };
+
   return (
-    <PageLayout title="Transaction History">
+    <Layout title="Transaction History">
       <TransactionsContainer>
         {/* Header Section */}
         <HeaderSection>
           <SearchSection>
             <div style={{ position: 'relative' }}>
-              <SearchInput 
-                placeholder="Search transactions..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <Tooltip content="Search transactions (Shortcut: /)" position="bottom">
+                <SearchInput 
+                  ref={searchInputRef}
+                  placeholder="Search transactions..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </Tooltip>
             </div>
-            <FilterSelect value={filterType} onChange={(e) => setFilterType(e.target.value)}>
-              <option value="all">All Types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
-            </FilterSelect>
-            <FilterSelect value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-              <option value="all">All Categories</option>
-              {allCategories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </FilterSelect>
+            <Tooltip content="Filter by type" position="bottom">
+              <FilterSelect value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+                <option value="all">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </FilterSelect>
+            </Tooltip>
+            <Tooltip content="Filter by category" position="bottom">
+              <FilterSelect value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+                <option value="all">All Categories</option>
+                {allCategories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </FilterSelect>
+            </Tooltip>
           </SearchSection>
-          <div style={{ display: 'flex', gap: 'var(--md)' }}>
-            <FilterButton onClick={handleExport}>
-              <FiDownload />
-              Export
-            </FilterButton>
-            <ActionButton onClick={() => setShowModal(true)}>
-              <FiPlus />
-              Add Transaction
-            </ActionButton>
+          <div style={{ display: 'flex', gap: 'var(--space-lg)' }}>
+            <Tooltip content="Export transactions as CSV" position="bottom">
+              <ActionButton onClick={handleExport} aria-label="Export transactions">
+                <FiDownload />
+                Export
+              </ActionButton>
+            </Tooltip>
+            <Tooltip content="Add new transaction (Shortcut: N)" position="bottom">
+              <ActionButton onClick={() => setShowModal(true)} aria-label="Add new transaction">
+                <FiPlus />
+                Add Transaction
+              </ActionButton>
+            </Tooltip>
           </div>
         </HeaderSection>
 
@@ -700,11 +726,11 @@ const Transactions = () => {
             <StatLabel>Total Transactions</StatLabel>
           </StatCard>
           <StatCard>
-            <StatNumber>{state.user.currency}{totalIncome.toFixed(2)}</StatNumber>
+            <StatNumber>${totalIncome.toFixed(2)}</StatNumber>
             <StatLabel>Total Income</StatLabel>
           </StatCard>
           <StatCard>
-            <StatNumber>{state.user.currency}{totalExpenses.toFixed(2)}</StatNumber>
+            <StatNumber>${totalExpenses.toFixed(2)}</StatNumber>
             <StatLabel>Total Expenses</StatLabel>
           </StatCard>
           <StatCard>
@@ -728,19 +754,21 @@ const Transactions = () => {
             filteredTransactions.map(transaction => (
               <TableRow key={transaction.id}>
                 <TransactionCell>
-                  <TransactionIcon type={transaction.type}>
-                    {transaction.type === 'income' ? <FiTrendingUp /> : <FiTrendingDown />}
-                  </TransactionIcon>
-                  <TransactionInfo>
-                    <TransactionTitle>{transaction.title}</TransactionTitle>
-                    <TransactionCategory>{transaction.category}</TransactionCategory>
-                  </TransactionInfo>
+                  <Tooltip content="Copy title" position="top">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {transaction.title}
+                      <FiCopy style={{ cursor: 'pointer' }} onClick={() => handleCopy(transaction.title)} tabIndex={0} aria-label="Copy title" />
+                    </span>
+                  </Tooltip>
                 </TransactionCell>
                 
                 <TransactionCell>
-                  <TransactionAmount type={transaction.type}>
-                    {transaction.type === 'income' ? '+' : '-'}{state.user.currency}{Math.abs(transaction.amount).toFixed(2)}
-                  </TransactionAmount>
+                  <Tooltip content="Copy amount" position="top">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {transaction.amount}
+                      <FiCopy style={{ cursor: 'pointer' }} onClick={() => handleCopy(transaction.amount)} tabIndex={0} aria-label="Copy amount" />
+                    </span>
+                  </Tooltip>
                 </TransactionCell>
                 
                 <TransactionCell>
@@ -759,10 +787,10 @@ const Transactions = () => {
                 
                 <TransactionCell>
                   <ActionButtons>
-                    <IconButton onClick={() => handleEdit(transaction)}>
+                    <IconButton onClick={() => handleEdit(transaction)} aria-label="Edit transaction">
                       <FiEdit3 />
                     </IconButton>
-                    <IconButton onClick={() => handleDelete(transaction.id)}>
+                    <IconButton onClick={() => handleDelete(transaction.id)} aria-label="Delete transaction">
                       <FiTrash2 />
                     </IconButton>
                   </ActionButtons>
@@ -773,7 +801,7 @@ const Transactions = () => {
             <EmptyState>
               <FiCreditCard size={48} style={{ opacity: 0.5 }} />
               <div>No transactions found</div>
-              <div style={{ fontSize: '0.9rem' }}>
+              <div style={{ fontSize: '0.875rem' }}>
                 {searchTerm || filterType !== 'all' || filterCategory !== 'all' 
                   ? 'Try adjusting your search or filters'
                   : 'Start by adding your first transaction'
@@ -820,33 +848,43 @@ const Transactions = () => {
 
                 <FormGroup>
                   <Label htmlFor="title">Title</Label>
-                  <Input
-                    type="text"
-                    id="title"
-                    placeholder="e.g., Grocery Shopping, Salary Payment"
-                    value={values.title}
-                    onChange={(e) => handleChange('title', e.target.value)}
-                    onBlur={() => handleBlur('title')}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="text"
+                      id="title"
+                      placeholder="Enter transaction title"
+                      value={values.title}
+                      onChange={(e) => handleChange('title', e.target.value)}
+                      onBlur={() => handleBlur('title')}
+                      aria-invalid={!!errors.title}
+                      aria-describedby="title-error"
+                    />
+                    {touched.title && !errors.title && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.title && errors.title && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.title && errors.title && (
-                    <ErrorText>{errors.title}</ErrorText>
+                    <ErrorText id="title-error">{errors.title}</ErrorText>
                   )}
                 </FormGroup>
 
                 <FormGroup>
                   <Label htmlFor="amount">Amount</Label>
-                  <Input
-                    type="number"
-                    id="amount"
-                    placeholder="Enter amount"
-                    value={values.amount}
-                    onChange={(e) => handleChange('amount', e.target.value)}
-                    onBlur={() => handleBlur('amount')}
-                    step="0.01"
-                    min="0"
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="number"
+                      id="amount"
+                      placeholder="Enter amount"
+                      value={values.amount}
+                      onChange={(e) => handleChange('amount', e.target.value)}
+                      onBlur={() => handleBlur('amount')}
+                      aria-invalid={!!errors.amount}
+                      aria-describedby="amount-error"
+                    />
+                    {touched.amount && !errors.amount && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.amount && errors.amount && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.amount && errors.amount && (
-                    <ErrorText>{errors.amount}</ErrorText>
+                    <ErrorText id="amount-error">{errors.amount}</ErrorText>
                   )}
                 </FormGroup>
 
@@ -857,28 +895,38 @@ const Transactions = () => {
                     value={values.category}
                     onChange={(e) => handleChange('category', e.target.value)}
                     onBlur={() => handleBlur('category')}
+                    aria-invalid={!!errors.category}
+                    aria-describedby="category-error"
                   >
                     <option value="">Select a category</option>
                     {state.categories[values.type]?.map(category => (
                       <option key={category} value={category}>{category}</option>
                     ))}
                   </Select>
+                  {touched.category && !errors.category && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                  {touched.category && errors.category && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
                   {touched.category && errors.category && (
-                    <ErrorText>{errors.category}</ErrorText>
+                    <ErrorText id="category-error">{errors.category}</ErrorText>
                   )}
                 </FormGroup>
 
                 <FormGroup>
                   <Label htmlFor="date">Date</Label>
-                  <Input
-                    type="date"
-                    id="date"
-                    value={values.date}
-                    onChange={(e) => handleChange('date', e.target.value)}
-                    onBlur={() => handleBlur('date')}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="date"
+                      id="date"
+                      value={values.date}
+                      onChange={(e) => handleChange('date', e.target.value)}
+                      onBlur={() => handleBlur('date')}
+                      aria-invalid={!!errors.date}
+                      aria-describedby="date-error"
+                    />
+                    {touched.date && !errors.date && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.date && errors.date && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.date && errors.date && (
-                    <ErrorText>{errors.date}</ErrorText>
+                    <ErrorText id="date-error">{errors.date}</ErrorText>
                   )}
                 </FormGroup>
 
@@ -889,7 +937,14 @@ const Transactions = () => {
                     placeholder="Add any additional notes..."
                     value={values.description}
                     onChange={(e) => handleChange('description', e.target.value)}
+                    aria-invalid={!!errors.description}
+                    aria-describedby="description-error"
                   />
+                  {touched.description && !errors.description && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                  {touched.description && errors.description && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  {touched.description && errors.description && (
+                    <ErrorText id="description-error">{errors.description}</ErrorText>
+                  )}
                 </FormGroup>
 
                 <FormActions>
@@ -905,7 +960,7 @@ const Transactions = () => {
           </ModalOverlay>
         )}
       </TransactionsContainer>
-    </PageLayout>
+    </Layout>
   )
 }
 

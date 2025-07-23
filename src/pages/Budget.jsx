@@ -1,97 +1,97 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FiPlus, FiEdit3, FiTrash2, FiTarget, FiAlertCircle } from 'react-icons/fi';
-import PageLayout from '../layouts/Layout';
+import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
 
 const BudgetContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
+  gap: var(--space-2xl);
 `;
 
 const BudgetOverview = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--lg);
-  margin-bottom: var(--xl);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
 `;
 
 const OverviewCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--sm);
-  box-shadow: var(--shadow-light);
+  gap: var(--space-sm);
+  box-shadow: var(--shadow-sm);
 `;
 
 const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  margin-bottom: var(--md);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
 `;
 
 const CardIcon = styled.div`
   width: 40px;
   height: 40px;
-  background: var(--accent-green-light);
-  border-radius: var(--radius);
+  background-color: var(--accent-primary-light);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-green-dark);
+  color: var(--accent-primary);
   font-size: 1.2rem;
 `;
 
 const CardTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-size: 1.125rem;
   font-weight: 600;
 `;
 
 const CardValue = styled.div`
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-main-light);
-  margin-bottom: var(--xs);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
 `;
 
 const CardSubtext = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const ActionsBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: var(--md);
+    gap: var(--space-lg);
     align-items: stretch;
   }
 `;
 
 const ActionButton = styled.button`
-  background: var(--accent-green);
-  color: var(--bg-card-light);
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: var(--sm);
+  gap: var(--space-sm);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
 `;
@@ -99,22 +99,22 @@ const ActionButton = styled.button`
 const BudgetList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--lg);
+  gap: var(--space-xl);
 `;
 
 const BudgetItem = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--lg);
-  box-shadow: var(--shadow-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-sm);
 `;
 
 const BudgetHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--md);
+  margin-bottom: var(--space-lg);
 `;
 
 const BudgetInfo = styled.div`
@@ -122,70 +122,70 @@ const BudgetInfo = styled.div`
 `;
 
 const BudgetCategory = styled.h4`
-  color: var(--text-main-light);
-  font-size: 1.2rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: var(--xs);
+  margin-bottom: var(--space-xs);
 `;
 
 const BudgetAmount = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const BudgetActions = styled.div`
   display: flex;
-  gap: var(--sm);
+  gap: var(--space-sm);
 `;
 
 const IconButton = styled.button`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--sm);
-  color: var(--text-secondary-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    color: var(--accent-green-dark);
-    border-color: var(--accent-green);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
   }
 `;
 
 const ProgressBar = styled.div`
   width: 100%;
   height: 8px;
-  background: var(--bg-sidebar-light);
+  background-color: var(--bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: var(--sm);
+  margin-bottom: var(--space-sm);
 `;
 
 const ProgressFill = styled.div`
   height: 100%;
-  background: ${props => {
-    if (props.percentage > 100) return 'var(--danger-red)';
-    if (props.percentage > 80) return 'var(--warning-orange)';
-    return 'var(--accent-green)';
+  background-color: ${props => {
+    if (props.percentage > 100) return 'var(--danger)';
+    if (props.percentage > 80) return 'var(--warning)';
+    return 'var(--accent-primary)';
   }};
   width: ${props => Math.min(props.percentage, 100)}%;
-  transition: var(--transition);
+  transition: all var(--transition-normal);
 `;
 
 const ProgressText = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 `;
 
 const SpentAmount = styled.span`
-  color: ${props => props.isOverBudget ? 'var(--danger-red)' : 'var(--text-main-light)'};
+  color: ${props => props.isOverBudget ? 'var(--danger)' : 'var(--text-primary)'};
   font-weight: 600;
 `;
 
 const RemainingAmount = styled.span`
-  color: ${props => props.isOverBudget ? 'var(--danger-red)' : 'var(--text-secondary-light)'};
+  color: ${props => props.isOverBudget ? 'var(--danger)' : 'var(--text-secondary)'};
 `;
 
 const ModalOverlay = styled.div`
@@ -194,126 +194,126 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background-color: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  padding: var(--md);
+  padding: var(--space-lg);
 `;
 
 const Modal = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
+  padding: var(--space-2xl);
   width: 100%;
   max-width: 500px;
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-lg);
 `;
 
 const ModalHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
 `;
 
 const ModalTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
 `;
 
 const CloseButton = styled.button`
   background: none;
   border: none;
-  color: var(--text-secondary-light);
+  color: var(--text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   &:hover {
-    color: var(--text-main-light);
+    color: var(--text-primary);
   }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xs);
+  gap: var(--space-xs);
 `;
 
 const Label = styled.label`
-  color: var(--text-main-light);
-  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
   font-weight: 500;
 `;
 
 const Input = styled.input`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
 `;
 
 const Select = styled.select`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  color: var(--text-main-light);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
   font-size: 1rem;
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   option {
-    background: var(--bg-card-light);
-    color: var(--text-main-light);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 
 const ErrorText = styled.div`
-  color: var(--danger-red);
-  font-size: 0.8rem;
-  margin-top: var(--xs);
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: var(--space-xs);
 `;
 
 const FormActions = styled.div`
   display: flex;
-  gap: var(--md);
-  margin-top: var(--lg);
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
 `;
 
 const SubmitButton = styled.button`
-  background: var(--accent-green);
-  color: var(--bg-card-light);
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
   border: none;
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   flex: 1;
   &:hover {
-    background: var(--accent-green-dark);
+    background-color: var(--accent-primary-hover);
     transform: translateY(-1px);
   }
   &:disabled {
@@ -324,28 +324,28 @@ const SubmitButton = styled.button`
 `;
 
 const CancelButton = styled.button`
-  background: var(--bg-sidebar-light);
-  color: var(--text-main-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md) var(--lg);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    border-color: var(--accent-green);
-    color: var(--accent-green-dark);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
   }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: var(--xxl);
-  color: var(--text-secondary-light);
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--md);
+  gap: var(--space-lg);
 `;
 
 /**
@@ -477,7 +477,7 @@ const Budget = () => {
   };
 
   return (
-    <PageLayout title="Budget Planning">
+    <Layout title="Budget Planning">
       <BudgetContainer>
         {/* Budget Overview */}
         <BudgetOverview>
@@ -504,7 +504,7 @@ const Budget = () => {
               <CardIcon><FiTarget /></CardIcon>
               <CardTitle>Remaining</CardTitle>
             </CardHeader>
-            <CardValue style={{ color: totalRemaining >= 0 ? 'var(--success-green)' : 'var(--danger-red)' }}>
+            <CardValue style={{ color: totalRemaining >= 0 ? 'var(--success)' : 'var(--danger)' }}>
               ${totalRemaining.toFixed(2)}
             </CardValue>
             <CardSubtext>
@@ -515,7 +515,7 @@ const Budget = () => {
 
         {/* Actions Bar */}
         <ActionsBar>
-          <h2 style={{ color: 'var(--text-main-light)', margin: 0 }}>Budget Categories</h2>
+          <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Budget Categories</h2>
           <ActionButton onClick={() => setShowModal(true)}>
             <FiPlus />
             Add Budget
@@ -536,7 +536,7 @@ const Budget = () => {
                   <BudgetInfo>
                     <BudgetCategory>
                       {budget.category}
-                      {isOverBudget && <FiAlertCircle style={{ color: 'var(--danger-red)', marginLeft: '8px' }} />}
+                      {isOverBudget && <FiAlertCircle style={{ color: 'var(--danger)', marginLeft: '8px' }} />}
                     </BudgetCategory>
                     <BudgetAmount>${budget.amount} / {budget.period}</BudgetAmount>
                   </BudgetInfo>
@@ -654,7 +654,7 @@ const Budget = () => {
           </ModalOverlay>
         )}
       </BudgetContainer>
-    </PageLayout>
+    </Layout>
   );
 };
 

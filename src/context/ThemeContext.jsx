@@ -10,64 +10,65 @@ export const useTheme = () => {
   return context;
 };
 
-export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(() => {
-    // Check localStorage first, then system preference
-    const saved = localStorage.getItem('budget-tracker-theme');
-    if (saved) {
-      return saved === 'dark';
+const ThemeProvider = ({ children }) => {
+  // Initialize theme from localStorage or system preference
+  const getInitialTheme = () => {
+    const savedTheme = localStorage.getItem('budget-tracker-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      return savedTheme;
     }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+    // If not set, use system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const systemTheme = prefersDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', systemTheme);
+    return systemTheme;
+  };
 
-  // Update document theme attribute and localStorage when theme changes
+  const [theme, setTheme] = useState(getInitialTheme);
+
+  // Apply theme to document and localStorage
   useEffect(() => {
-    const root = document.documentElement;
-    
-    if (isDark) {
-      root.setAttribute('data-theme', 'dark');
-    } else {
-      root.removeAttribute('data-theme');
-    }
-    
-    localStorage.setItem('budget-tracker-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('budget-tracker-theme', theme);
+  }, [theme]);
 
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
     const handleChange = (e) => {
-      // Only update if user hasn't manually set a theme
-      if (!localStorage.getItem('budget-tracker-theme')) {
-        setIsDark(e.matches);
+      const savedTheme = localStorage.getItem('budget-tracker-theme');
+      if (!savedTheme) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
       }
     };
-
     mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('budget-tracker-theme', newTheme);
   };
 
-  const setTheme = (dark) => {
-    setIsDark(dark);
+  const value = {
+    theme,
+    toggleTheme,
+    isDark: theme === 'dark',
+    isLight: theme === 'light'
   };
 
   return (
-    <ThemeContext.Provider 
-      value={{ 
-        isDark, 
-        toggleTheme, 
-        setTheme,
-        theme: isDark ? 'dark' : 'light'
-      }}
-    >
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-export default ThemeContext; 
+export { ThemeProvider }; 

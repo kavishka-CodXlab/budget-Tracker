@@ -12,12 +12,6 @@ const initialState = {
     currency: '$'
   },
   
-  // Theme state
-  theme: {
-    isDark: true,
-    primaryColor: '#00e676'
-  },
-  
   // Transactions data
   transactions: [],
   
@@ -44,10 +38,6 @@ export const ACTIONS = {
   // User actions
   UPDATE_USER: 'UPDATE_USER',
   
-  // Theme actions
-  TOGGLE_THEME: 'TOGGLE_THEME',
-  SET_THEME: 'SET_THEME',
-  
   // Transaction actions
   ADD_TRANSACTION: 'ADD_TRANSACTION',
   UPDATE_TRANSACTION: 'UPDATE_TRANSACTION',
@@ -72,34 +62,7 @@ export const ACTIONS = {
   REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION'
 };
 
-// Helper function to apply theme to CSS variables
-const applyTheme = (isDark) => {
-  const root = document.documentElement;
-  
-  if (isDark) {
-    // Dark theme
-    root.style.setProperty('--bg-dark', '#10151c');
-    root.style.setProperty('--bg-darker', '#0a0e14');
-    root.style.setProperty('--bg-card', '#181e25');
-    root.style.setProperty('--bg-glass', 'rgba(24, 30, 37, 0.85)');
-    root.style.setProperty('--text-white', '#ffffff');
-    root.style.setProperty('--text-light', '#e0e6ed');
-    root.style.setProperty('--text-gray', '#94a3b8');
-    root.style.setProperty('--border', 'rgba(36, 255, 164, 0.08)');
-    root.style.setProperty('--border-light', 'rgba(255,255,255,0.04)');
-  } else {
-    // Light theme
-    root.style.setProperty('--bg-dark', '#ffffff');
-    root.style.setProperty('--bg-darker', '#f8fafc');
-    root.style.setProperty('--bg-card', '#f1f5f9');
-    root.style.setProperty('--bg-glass', 'rgba(241, 245, 249, 0.85)');
-    root.style.setProperty('--text-white', '#1e293b');
-    root.style.setProperty('--text-light', '#334155');
-    root.style.setProperty('--text-gray', '#64748b');
-    root.style.setProperty('--border', 'rgba(0, 230, 118, 0.15)');
-    root.style.setProperty('--border-light', 'rgba(0,0,0,0.08)');
-  }
-};
+ 
 
 // Reducer function to handle state updates
 const appReducer = (state, action) => {
@@ -108,22 +71,6 @@ const appReducer = (state, action) => {
       return {
         ...state,
         user: { ...state.user, ...action.payload }
-      };
-      
-    case ACTIONS.TOGGLE_THEME: {
-      const newIsDark = !state.theme.isDark;
-      applyTheme(newIsDark);
-      return {
-        ...state,
-        theme: { ...state.theme, isDark: newIsDark }
-      };
-    }
-      
-    case ACTIONS.SET_THEME:
-      applyTheme(action.payload);
-      return {
-        ...state,
-        theme: { ...state.theme, isDark: action.payload }
       };
       
     case ACTIONS.ADD_TRANSACTION:
@@ -271,7 +218,6 @@ export const AppProvider = ({ children }) => {
   const loadedState = {
     ...initialState,
     user: loadFromLocalStorage('budgetTracker_user', initialState.user),
-    theme: loadFromLocalStorage('budgetTracker_theme', initialState.theme),
     transactions: loadFromLocalStorage('budgetTracker_transactions', initialState.transactions),
     budgets: loadFromLocalStorage('budgetTracker_budgets', initialState.budgets),
     goals: loadFromLocalStorage('budgetTracker_goals', initialState.goals),
@@ -280,19 +226,10 @@ export const AppProvider = ({ children }) => {
   
   const [state, dispatch] = useReducer(appReducer, loadedState);
   
-  // Apply theme on initial load
-  useEffect(() => {
-    applyTheme(state.theme.isDark);
-  }, []);
-  
   // Save to localStorage whenever relevant state changes
   useEffect(() => {
     saveToLocalStorage('budgetTracker_user', state.user);
   }, [state.user]);
-  
-  useEffect(() => {
-    saveToLocalStorage('budgetTracker_theme', state.theme);
-  }, [state.theme]);
   
   useEffect(() => {
     saveToLocalStorage('budgetTracker_transactions', state.transactions);
@@ -314,10 +251,6 @@ export const AppProvider = ({ children }) => {
   const actions = {
     // User actions
     updateUser: (userData) => dispatch({ type: ACTIONS.UPDATE_USER, payload: userData }),
-    
-    // Theme actions
-    toggleTheme: () => dispatch({ type: ACTIONS.TOGGLE_THEME }),
-    setTheme: (isDark) => dispatch({ type: ACTIONS.SET_THEME, payload: isDark }),
     
     // Transaction actions
     addTransaction: (transaction) => {

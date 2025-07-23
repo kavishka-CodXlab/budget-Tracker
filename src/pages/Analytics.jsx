@@ -16,21 +16,21 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import PageLayout from '../layouts/Layout';
+import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
-import { FiTrendingUp, FiTrendingDown, FiDollarSign, FiCalendar, FiPieChart, FiBarChart3 } from 'react-icons/fi';
+import { FiTrendingUp, FiTrendingDown, FiDollarSign, FiCalendar, FiPieChart, FiBarChart2 } from 'react-icons/fi';
 
 const AnalyticsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
+  gap: var(--space-2xl);
 `;
 
 const ControlsSection = styled.div`
   display: flex;
-  gap: var(--md);
+  gap: var(--space-lg);
   align-items: center;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: stretch;
@@ -38,54 +38,54 @@ const ControlsSection = styled.div`
 `;
 
 const FilterButton = styled.button`
-  background: ${props => props.active ? 'var(--accent-green)' : 'var(--bg-card-light)'};
-  color: ${props => props.active ? 'var(--bg-card-light)' : 'var(--text-main-light)'};
-  border: 1px solid ${props => props.active ? 'var(--accent-green)' : 'var(--border-light)'};
-  border-radius: var(--radius);
-  padding: var(--sm) var(--md);
-  font-size: 0.9rem;
+  background-color: ${props => props.active ? 'var(--accent-primary)' : 'var(--bg-card)'};
+  color: ${props => props.active ? 'var(--text-inverse)' : 'var(--text-primary)'};
+  border: 1px solid ${props => props.active ? 'var(--accent-primary)' : 'var(--border-primary)'};
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-fast);
   &:hover {
-    border-color: var(--accent-green);
-    ${props => !props.active && 'color: var(--accent-green-dark);'}
+    border-color: var(--accent-primary);
+    ${props => !props.active && 'color: var(--accent-primary);'}
   }
 `;
 
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--lg);
-  margin-bottom: var(--xl);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-2xl);
 `;
 
 const StatCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--lg);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
   display: flex;
   align-items: center;
-  gap: var(--md);
-  box-shadow: var(--shadow-light);
-  transition: var(--transition);
+  gap: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
   &:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-light);
+    box-shadow: var(--shadow-md);
   }
 `;
 
 const StatIcon = styled.div`
   width: 50px;
   height: 50px;
-  background: ${props => props.color || 'var(--accent-green-light)'};
-  border-radius: var(--radius);
+  background-color: ${props => props.color || 'var(--accent-primary-light)'};
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: ${props => props.textColor || 'var(--accent-green-dark)'};
+  color: ${props => props.textColor || 'var(--accent-primary)'};
 `;
 
 const StatInfo = styled.div`
@@ -93,42 +93,42 @@ const StatInfo = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: 1.8rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-main-light);
-  margin-bottom: var(--xs);
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
 `;
 
 const StatLabel = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `;
 
 const ChartsGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--xl);
+  gap: var(--space-2xl);
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const ChartCard = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  box-shadow: var(--shadow-light);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-sm);
 `;
 
 const ChartTitle = styled.h3`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: var(--lg);
+  margin-bottom: var(--space-xl);
   display: flex;
   align-items: center;
-  gap: var(--sm);
+  gap: var(--space-sm);
 `;
 
 const ChartContainer = styled.div`
@@ -155,12 +155,12 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div style={{
-        background: 'var(--bg-card-light)',
-        border: '1px solid var(--border-light)',
-        borderRadius: 'var(--radius)',
-        padding: 'var(--md)',
-        boxShadow: 'var(--shadow-light)',
-        color: 'var(--text-main-light)'
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border-primary)',
+        borderRadius: 'var(--radius-md)',
+        padding: 'var(--space-md)',
+        boxShadow: 'var(--shadow-md)',
+        color: 'var(--text-primary)'
       }}>
         <p style={{ marginBottom: '4px', fontWeight: '600' }}>{label}</p>
         {payload.map((entry, index) => (
@@ -273,11 +273,11 @@ const Analytics = () => {
   ];
 
   return (
-    <PageLayout title="Financial Analytics">
+    <Layout title="Financial Analytics">
       <AnalyticsContainer>
         {/* Time Filter Controls */}
         <ControlsSection>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sm)', color: 'var(--text-secondary-light)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', color: 'var(--text-secondary)' }}>
             <FiCalendar />
             <span>Time Period:</span>
           </div>
@@ -295,7 +295,7 @@ const Analytics = () => {
         {/* Key Statistics */}
         <StatsGrid>
           <StatCard>
-            <StatIcon color="var(--success-green)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--success-light)" textColor="var(--success)">
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>
@@ -305,7 +305,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--danger-red)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--danger-light)" textColor="var(--danger)">
               <FiTrendingDown />
             </StatIcon>
             <StatInfo>
@@ -315,7 +315,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--accent-green)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--accent-primary-light)" textColor="var(--accent-primary)">
               <FiDollarSign />
             </StatIcon>
             <StatInfo>
@@ -325,7 +325,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--warning-orange)" textColor="var(--bg-card-light)">
+            <StatIcon color="var(--warning-light)" textColor="var(--warning)">
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>
@@ -368,15 +368,15 @@ const Analytics = () => {
           {/* Income vs Expenses Comparison */}
           <ChartCard>
             <ChartTitle>
-              <FiBarChart3 />
+              <FiBarChart2 />
               Income vs Expenses
             </ChartTitle>
             <ChartContainer>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analyticsData.comparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-light)" />
-                  <XAxis dataKey="name" stroke="var(--text-secondary-light)" />
-                  <YAxis stroke="var(--text-secondary-light)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" />
+                  <YAxis stroke="var(--text-secondary)" />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="value" fill="#4ade80" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -404,9 +404,9 @@ const Analytics = () => {
                     <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-light)" />
-                <XAxis dataKey="month" stroke="var(--text-secondary-light)" />
-                <YAxis stroke="var(--text-secondary-light)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
+                <XAxis dataKey="month" stroke="var(--text-secondary)" />
+                <YAxis stroke="var(--text-secondary)" />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
@@ -429,7 +429,7 @@ const Analytics = () => {
           </LargeChartContainer>
         </LargeChartCard>
       </AnalyticsContainer>
-    </PageLayout>
+    </Layout>
   );
 };
 

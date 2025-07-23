@@ -1,362 +1,424 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import PageLayout from '../layouts/Layout'
-import { useAppContext } from '../context/AppContext'
-import { useForm } from '../hooks/useForm'
-import { 
-  FiUser, 
-  FiPalette, 
-  FiDownload, 
-  FiSettings, 
-  FiSave,
-  FiTrash2,
-  FiRefreshCw,
-  FiMoon,
-  FiSun,
-  FiDollarSign,
-  FiMail,
-  FiEdit3,
-  FiCheck
-} from 'react-icons/fi'
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { FiUser, FiCreditCard, FiSave, FiMoon, FiSun, FiDownload, FiUpload, FiBell, FiLock, FiDatabase } from 'react-icons/fi';
+import Layout from '../layouts/Layout';
+import { useAppContext } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
+import useForm from '../hooks/useForm';
 
 const SettingsContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: var(--xl);
+  gap: var(--space-2xl);
   max-width: 800px;
 `;
 
 const SettingsSection = styled.div`
-  background: var(--bg-card-light);
-  border: 1px solid var(--border-light);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--xl);
-  box-shadow: var(--shadow-light);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-sm);
 `;
 
 const SectionHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  margin-bottom: var(--lg);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xl);
 `;
 
 const SectionIcon = styled.div`
   width: 40px;
   height: 40px;
-  border-radius: var(--radius);
-  background: var(--accent-green-light);
+  background-color: var(--accent-primary-light);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--accent-primary);
   font-size: 1.2rem;
-  color: var(--accent-green-dark);
 `;
 
 const SectionTitle = styled.h2`
-  color: var(--text-main-light);
-  font-size: 1.3rem;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
   margin: 0;
 `;
 
-const SectionDescription = styled.p`
-  color: var(--text-secondary-light);
-  font-size: 0.9rem;
-  margin: 0;
-  margin-top: var(--xs);
+const FormGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: var(--lg);
-  &:last-child {
-    margin-bottom: 0;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
 `;
 
 const Label = styled.label`
-  display: block;
-  color: var(--text-main-light);
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: var(--sm);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: var(--sm) var(--md);
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  color: var(--text-main-light);
-  font-size: 0.95rem;
-  transition: var(--transition);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   &::placeholder {
-    color: var(--text-secondary-light);
+    color: var(--text-secondary);
   }
 `;
 
 const Select = styled.select`
-  width: 100%;
-  padding: var(--sm) var(--md);
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  color: var(--text-main-light);
-  font-size: 0.95rem;
-  transition: var(--transition);
-  cursor: pointer;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
   &:focus {
     outline: none;
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 2px rgba(34,197,94,0.10);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.1);
   }
   option {
-    background: var(--bg-card-light);
-    color: var(--text-main-light);
+    background-color: var(--bg-card);
+    color: var(--text-primary);
   }
 `;
 
-const ThemeSelector = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--md);
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const ThemeOption = styled.div`
-  background: var(--bg-sidebar-light);
-  border: 2px solid ${props => props.active ? 'var(--accent-green)' : 'var(--border-light)'};
-  border-radius: var(--radius);
-  padding: var(--md);
-  cursor: pointer;
-  transition: var(--transition);
+const ToggleContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--sm);
-  &:hover {
-    border-color: var(--accent-green);
-    background: var(--bg-card-light);
-  }
+  justify-content: space-between;
+  padding: var(--space-lg);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-lg);
 `;
 
-const ThemeIcon = styled.div`
+const ToggleInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+`;
+
+const ToggleIcon = styled.div`
   width: 32px;
   height: 32px;
-  border-radius: var(--radius);
-  background: ${props => props.active ? 'var(--accent-green)' : 'var(--bg-card-light)'};
+  background-color: var(--accent-primary-light);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  color: ${props => props.active ? 'var(--bg-card-light)' : 'var(--text-secondary-light)'};
+  color: var(--accent-primary);
 `;
 
-const ThemeInfo = styled.div`
-  flex: 1;
+const ToggleLabel = styled.div`
+  color: var(--text-primary);
+  font-weight: 500;
 `;
 
-const ThemeName = styled.div`
-  color: var(--text-main-light);
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 2px;
+const ToggleDescription = styled.div`
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: var(--space-xs);
 `;
 
-const ThemeDescription = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.8rem;
+const Toggle = styled.button`
+  width: 52px;
+  height: 28px;
+  background-color: ${props => props.active ? 'var(--accent-primary)' : 'var(--bg-secondary)'};
+  border: none;
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  
+  &:before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: var(--text-inverse);
+    border-radius: 50%;
+    top: 2px;
+    left: ${props => props.active ? '26px' : '2px'};
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+  }
+`;
+
+const ButtonGrid = styled.div`
+  display: flex;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const Button = styled.button`
-  background: ${props => props.variant === 'danger' ? 'var(--danger-red)' : 
-                       props.variant === 'secondary' ? 'var(--bg-sidebar-light)' : 
-                       'var(--accent-green)'};
-  border: 1px solid ${props => props.variant === 'danger' ? 'var(--danger-red)' : 
-                               props.variant === 'secondary' ? 'var(--border-light)' : 
-                               'transparent'};
-  border-radius: var(--radius);
-  color: ${props => props.variant === 'secondary' ? 'var(--text-main-light)' : 'var(--bg-card-light)'};
-  padding: var(--sm) var(--md);
-  font-size: 0.9rem;
+  background-color: ${props => props.primary ? 'var(--accent-primary)' : 'var(--bg-tertiary)'};
+  color: ${props => props.primary ? 'var(--text-inverse)' : 'var(--text-primary)'};
+  border: 1px solid ${props => props.primary ? 'var(--accent-primary)' : 'var(--border-primary)'};
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
   font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: var(--xs);
+  gap: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex: 1;
+  justify-content: center;
+  
   &:hover {
+    background-color: ${props => props.primary ? 'var(--accent-primary-hover)' : 'var(--bg-secondary)'};
     transform: translateY(-1px);
-    background: ${props => props.variant === 'danger' ? 'var(--danger-red)' : 
-                           props.variant === 'secondary' ? 'var(--bg-card-light)' : 
-                           'var(--accent-green-dark)'};
+    box-shadow: var(--shadow-sm);
   }
+  
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
   }
 `;
 
-const ButtonGroup = styled.div`
+const AdvancedSection = styled.div`
+  border-top: 1px solid var(--border-primary);
+  padding-top: var(--space-xl);
+  margin-top: var(--space-xl);
+`;
+
+const AdvancedTitle = styled.h3`
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-lg);
+`;
+
+const WarningBox = styled.div`
+  background-color: var(--warning-light);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  color: var(--warning-dark);
+`;
+
+const WarningTitle = styled.div`
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+`;
+
+const WarningText = styled.div`
+  font-size: 0.875rem;
+`;
+
+const FileInput = styled.input`
+  display: none;
+`;
+
+const FileLabel = styled.label`
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-xl);
+  color: var(--text-primary);
+  font-weight: 500;
   display: flex;
-  gap: var(--sm);
-  margin-top: var(--lg);
-  @media (max-width: 480px) {
-    flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  justify-content: center;
+  
+  &:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
   }
 `;
 
-const DataSection = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--md);
-  margin-top: var(--lg);
+const ErrorText = styled.div`
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: var(--space-xs);
 `;
 
-const DataCard = styled.div`
-  background: var(--bg-sidebar-light);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: var(--md);
-  text-align: center;
-`;
-
-const DataValue = styled.div`
-  color: var(--accent-green);
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: var(--xs);
-`;
-
-const DataLabel = styled.div`
-  color: var(--text-secondary-light);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
-
-const SuccessMessage = styled.div`
-  background: var(--success-green);
-  color: var(--bg-card-light);
-  padding: var(--sm) var(--md);
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: var(--md);
-  display: flex;
-  align-items: center;
-  gap: var(--xs);
-`;
-
-/**
- * Settings Component - updated with new theme
- */
 const Settings = () => {
-  const { state, actions, calculated } = useAppContext();
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  
-  // Form for user profile settings
-  const { values, handleChange, resetForm } = useForm({
-    name: state.user.name,
-    email: state.user.email,
-    currency: state.user.currency
+  const { state, actions } = useAppContext();
+  const { theme, toggleTheme } = useTheme();
+  const [notifications, setNotifications] = useState({
+    transactionAlerts: true,
+    budgetWarnings: true,
+    goalReminders: false,
+    weeklyReports: true
   });
 
-  const handleSaveProfile = (e) => {
-    e.preventDefault();
-    
-    // Update user data
-    actions.updateUser(values);
-    
-    // Show success message
-    setSaveSuccess(true);
-    actions.addNotification('Profile updated successfully!', 'success');
-    
-    // Hide success message after 3 seconds
-    setTimeout(() => setSaveSuccess(false), 3000);
+  // Profile form validation
+  const profileValidationRules = {
+    name: {
+      required: { message: 'Name is required' },
+      minLength: { value: 2, message: 'Name must be at least 2 characters' }
+    },
+    email: {
+      required: { message: 'Email is required' },
+      email: { message: 'Please enter a valid email address' }
+    }
   };
 
-  const handleThemeChange = (isDark) => {
-    actions.setTheme(isDark);
-    actions.addNotification(
-      `Switched to ${isDark ? 'dark' : 'light'} theme`,
-      'success',
-      3000
-    );
+  // Profile form
+  const {
+    values: profileValues,
+    errors: profileErrors,
+    touched: profileTouched,
+    isSubmitting: profileSubmitting,
+    handleChange: handleProfileChange,
+    handleBlur: handleProfileBlur,
+    handleSubmit: handleProfileSubmit
+  } = useForm(
+    {
+      name: state.user?.name || '',
+      email: state.user?.email || '',
+      currency: state.user?.currency || 'USD',
+      timezone: state.user?.timezone || 'UTC',
+      language: state.user?.language || 'en'
+    },
+    profileValidationRules
+  );
+
+  // Currency options
+  const currencies = [
+    { value: 'USD', label: 'US Dollar ($)' },
+    { value: 'EUR', label: 'Euro (€)' },
+    { value: 'GBP', label: 'British Pound (£)' },
+    { value: 'JPY', label: 'Japanese Yen (¥)' },
+    { value: 'CAD', label: 'Canadian Dollar (C$)' },
+    { value: 'AUD', label: 'Australian Dollar (A$)' }
+  ];
+
+  // Timezone options (simplified list)
+  const timezones = [
+    { value: 'UTC', label: 'UTC' },
+    { value: 'America/New_York', label: 'Eastern Time' },
+    { value: 'America/Chicago', label: 'Central Time' },
+    { value: 'America/Denver', label: 'Mountain Time' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time' },
+    { value: 'Europe/London', label: 'London' },
+    { value: 'Europe/Paris', label: 'Paris' },
+    { value: 'Asia/Tokyo', label: 'Tokyo' },
+    { value: 'Australia/Sydney', label: 'Sydney' }
+  ];
+
+
+
+  // Handle profile form submission
+  const onProfileSubmit = async (formData) => {
+    try {
+      actions.updateUserProfile(formData);
+      actions.addNotification('Profile updated successfully!', 'success');
+    } catch (error) {
+      console.error('Profile update error:', error);
+      actions.addNotification('Failed to update profile. Please try again.', 'error');
+    }
   };
 
-  const handleExportData = (format) => {
+  // Handle notification toggle
+  const handleNotificationToggle = (key) => {
+    setNotifications(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Handle data export
+  const handleExportData = () => {
     try {
       const exportData = {
-        user: state.user,
         transactions: state.transactions,
         budgets: state.budgets,
         goals: state.goals,
         categories: state.categories,
-        exportDate: new Date().toISOString()
+        exportedAt: new Date().toISOString()
       };
 
-      let dataStr, filename;
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
       
-      if (format === 'json') {
-        dataStr = JSON.stringify(exportData, null, 2);
-        filename = `budget-data-${new Date().toISOString().split('T')[0]}.json`;
-      } else {
-        // CSV format for transactions
-        const headers = ['Date', 'Title', 'Amount', 'Type', 'Category'];
-        const csvData = [
-          headers.join(','),
-          ...state.transactions.map(t => [
-            t.date,
-            `"${t.title}"`,
-            t.amount,
-            t.type,
-            `"${t.category}"`
-          ].join(','))
-        ];
-        dataStr = csvData.join('\n');
-        filename = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
-      }
-
-      // Download file
-      const blob = new Blob([dataStr], { type: format === 'json' ? 'application/json' : 'text/csv' });
-      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = filename;
+      link.download = `budget-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      actions.addNotification(`Data exported as ${format.toUpperCase()}`, 'success');
-    } catch {
-      actions.addNotification('Failed to export data', 'error');
+      actions.addNotification('Data exported successfully!', 'success');
+    } catch (error) {
+      console.error('Export error:', error);
+      actions.addNotification('Failed to export data. Please try again.', 'error');
     }
   };
 
-  const handleResetData = () => {
-    if (window.confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-      // Clear all data
-      actions.setTransactions([]);
-      localStorage.removeItem('budgetTracker_transactions');
-      localStorage.removeItem('budgetTracker_budgets');
-      localStorage.removeItem('budgetTracker_goals');
-      
-      actions.addNotification('All data has been reset', 'info');
+  // Handle data import
+  const handleImportData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Validate imported data structure
+        if (!importedData.transactions || !importedData.budgets || !importedData.goals) {
+          throw new Error('Invalid file format');
+        }
+
+        actions.importData(importedData);
+        actions.addNotification('Data imported successfully!', 'success');
+      } catch (error) {
+        console.error('Import error:', error);
+        actions.addNotification('Failed to import data. Please check the file format.', 'error');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Handle clear all data
+  const handleClearData = () => {
+    if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+      actions.clearAllData();
+      actions.addNotification('All data cleared successfully!', 'warning');
     }
   };
 
   return (
-    <PageLayout title="Settings">
+    <Layout title="Settings">
       <SettingsContainer>
         {/* Profile Settings */}
         <SettingsSection>
@@ -364,179 +426,243 @@ const Settings = () => {
             <SectionIcon>
               <FiUser />
             </SectionIcon>
-            <div>
-              <SectionTitle>Profile Settings</SectionTitle>
-              <SectionDescription>Manage your personal information and preferences</SectionDescription>
-            </div>
+            <SectionTitle>Profile Settings</SectionTitle>
           </SectionHeader>
 
-          {saveSuccess && (
-            <SuccessMessage>
-              <FiCheck />
-              Profile saved successfully!
-            </SuccessMessage>
-          )}
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleProfileSubmit(onProfileSubmit);
+          }}>
+            <FormGrid>
+              <FormGroup>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  type="text"
+                  id="name"
+                  placeholder="Enter your full name"
+                  value={profileValues.name}
+                  onChange={(e) => handleProfileChange('name', e.target.value)}
+                  onBlur={() => handleProfileBlur('name')}
+                />
+                {profileTouched.name && profileErrors.name && (
+                  <ErrorText>{profileErrors.name}</ErrorText>
+                )}
+              </FormGroup>
 
-          <form onSubmit={handleSaveProfile}>
-            <FormGroup>
-              <Label htmlFor="name">
-                <FiEdit3 style={{ marginRight: '0.5rem' }} />
-                Display Name
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                name="name"
-                value={values.name}
-                onChange={handleChange}
-                placeholder="Your name"
-                required
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  value={profileValues.email}
+                  onChange={(e) => handleProfileChange('email', e.target.value)}
+                  onBlur={() => handleProfileBlur('email')}
+                />
+                {profileTouched.email && profileErrors.email && (
+                  <ErrorText>{profileErrors.email}</ErrorText>
+                )}
+              </FormGroup>
 
-            <FormGroup>
-              <Label htmlFor="email">
-                <FiMail style={{ marginRight: '0.5rem' }} />
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                name="email"
-                value={values.email}
-                onChange={handleChange}
-                placeholder="your.email@example.com"
-                required
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label htmlFor="currency">Currency</Label>
+                <Select
+                  id="currency"
+                  value={profileValues.currency}
+                  onChange={(e) => handleProfileChange('currency', e.target.value)}
+                >
+                  {currencies.map(currency => (
+                    <option key={currency.value} value={currency.value}>
+                      {currency.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormGroup>
 
-            <FormGroup>
-              <Label htmlFor="currency">
-                <FiDollarSign style={{ marginRight: '0.5rem' }} />
-                Preferred Currency
-              </Label>
-              <Select
-                id="currency"
-                name="currency"
-                value={values.currency}
-                onChange={handleChange}
-              >
-                <option value="$">US Dollar ($)</option>
-                <option value="€">Euro (€)</option>
-                <option value="£">British Pound (£)</option>
-                <option value="¥">Japanese Yen (¥)</option>
-                <option value="₹">Indian Rupee (₹)</option>
-                <option value="C$">Canadian Dollar (C$)</option>
-                <option value="A$">Australian Dollar (A$)</option>
-              </Select>
-            </FormGroup>
+              <FormGroup>
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select
+                  id="timezone"
+                  value={profileValues.timezone}
+                  onChange={(e) => handleProfileChange('timezone', e.target.value)}
+                >
+                  {timezones.map(timezone => (
+                    <option key={timezone.value} value={timezone.value}>
+                      {timezone.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormGroup>
+            </FormGrid>
 
-            <ButtonGroup>
-              <Button type="submit">
+            <ButtonGrid>
+              <Button primary type="submit" disabled={profileSubmitting}>
                 <FiSave />
-                Save Changes
+                {profileSubmitting ? 'Saving...' : 'Save Profile'}
               </Button>
-              <Button type="button" variant="secondary" onClick={resetForm}>
-                <FiRefreshCw />
-                Reset
-              </Button>
-            </ButtonGroup>
+            </ButtonGrid>
           </form>
         </SettingsSection>
 
-        {/* Theme Settings */}
+        {/* Appearance Settings */}
         <SettingsSection>
           <SectionHeader>
             <SectionIcon>
-              <FiPalette />
+              {theme === 'dark' ? <FiMoon /> : <FiSun />}
             </SectionIcon>
-            <div>
-              <SectionTitle>Appearance</SectionTitle>
-              <SectionDescription>Choose your preferred theme and display options</SectionDescription>
-            </div>
+            <SectionTitle>Appearance</SectionTitle>
           </SectionHeader>
 
-          <FormGroup>
-            <Label>Theme Selection</Label>
-            <ThemeSelector>
-              <ThemeOption 
-                active={state.theme.isDark} 
-                onClick={() => handleThemeChange(true)}
-              >
-                <ThemeIcon active={state.theme.isDark}>
-                  <FiMoon />
-                </ThemeIcon>
-                <ThemeInfo>
-                  <ThemeName>Dark Theme</ThemeName>
-                  <ThemeDescription>Easy on the eyes</ThemeDescription>
-                </ThemeInfo>
-              </ThemeOption>
+          <ToggleContainer>
+            <ToggleInfo>
+              <ToggleIcon>
+                {theme === 'dark' ? <FiMoon /> : <FiSun />}
+              </ToggleIcon>
+              <div>
+                <ToggleLabel>Dark Mode</ToggleLabel>
+                <ToggleDescription>
+                  Switch between light and dark themes
+                </ToggleDescription>
+              </div>
+            </ToggleInfo>
+            <Toggle active={theme === 'dark'} onClick={toggleTheme} />
+          </ToggleContainer>
+        </SettingsSection>
 
-              <ThemeOption 
-                active={!state.theme.isDark} 
-                onClick={() => handleThemeChange(false)}
-              >
-                <ThemeIcon active={!state.theme.isDark}>
-                  <FiSun />
-                </ThemeIcon>
-                <ThemeInfo>
-                  <ThemeName>Light Theme</ThemeName>
-                  <ThemeDescription>Clean and bright</ThemeDescription>
-                </ThemeInfo>
-              </ThemeOption>
-            </ThemeSelector>
-          </FormGroup>
+        {/* Notification Settings */}
+        <SettingsSection>
+          <SectionHeader>
+            <SectionIcon>
+              <FiBell />
+            </SectionIcon>
+            <SectionTitle>Notifications</SectionTitle>
+          </SectionHeader>
+
+          <ToggleContainer>
+            <ToggleInfo>
+              <ToggleIcon>
+                <FiBell />
+              </ToggleIcon>
+              <div>
+                <ToggleLabel>Transaction Alerts</ToggleLabel>
+                <ToggleDescription>
+                  Get notified when transactions are added
+                </ToggleDescription>
+              </div>
+            </ToggleInfo>
+            <Toggle 
+              active={notifications.transactionAlerts} 
+              onClick={() => handleNotificationToggle('transactionAlerts')} 
+            />
+          </ToggleContainer>
+
+          <ToggleContainer>
+            <ToggleInfo>
+              <ToggleIcon>
+                <FiCreditCard />
+              </ToggleIcon>
+              <div>
+                <ToggleLabel>Budget Warnings</ToggleLabel>
+                <ToggleDescription>
+                  Alert when approaching budget limits
+                </ToggleDescription>
+              </div>
+            </ToggleInfo>
+            <Toggle 
+              active={notifications.budgetWarnings} 
+              onClick={() => handleNotificationToggle('budgetWarnings')} 
+            />
+          </ToggleContainer>
+
+          <ToggleContainer>
+            <ToggleInfo>
+              <ToggleIcon>
+                <FiLock />
+              </ToggleIcon>
+              <div>
+                <ToggleLabel>Goal Reminders</ToggleLabel>
+                <ToggleDescription>
+                  Remind me about my financial goals
+                </ToggleDescription>
+              </div>
+            </ToggleInfo>
+            <Toggle 
+              active={notifications.goalReminders} 
+              onClick={() => handleNotificationToggle('goalReminders')} 
+            />
+          </ToggleContainer>
+
+          <ToggleContainer>
+            <ToggleInfo>
+              <ToggleIcon>
+                <FiDatabase />
+              </ToggleIcon>
+              <div>
+                <ToggleLabel>Weekly Reports</ToggleLabel>
+                <ToggleDescription>
+                  Receive weekly spending summaries
+                </ToggleDescription>
+              </div>
+            </ToggleInfo>
+            <Toggle 
+              active={notifications.weeklyReports} 
+              onClick={() => handleNotificationToggle('weeklyReports')} 
+            />
+          </ToggleContainer>
         </SettingsSection>
 
         {/* Data Management */}
         <SettingsSection>
           <SectionHeader>
             <SectionIcon>
-              <FiSettings />
+              <FiDatabase />
             </SectionIcon>
-            <div>
-              <SectionTitle>Data Management</SectionTitle>
-              <SectionDescription>Export your data or reset your budget information</SectionDescription>
-            </div>
+            <SectionTitle>Data Management</SectionTitle>
           </SectionHeader>
 
-          <DataSection>
-            <DataCard>
-              <DataValue>{calculated.transactionCount}</DataValue>
-              <DataLabel>Transactions</DataLabel>
-            </DataCard>
-            <DataCard>
-              <DataValue>{state.budgets.length}</DataValue>
-              <DataLabel>Budget Plans</DataLabel>
-            </DataCard>
-            <DataCard>
-              <DataValue>{state.goals.length}</DataValue>
-              <DataLabel>Financial Goals</DataLabel>
-            </DataCard>
-            <DataCard>
-              <DataValue>{state.user.currency}{calculated.netBalance.toFixed(0)}</DataValue>
-              <DataLabel>Net Balance</DataLabel>
-            </DataCard>
-          </DataSection>
+          <ButtonGrid>
+            <Button onClick={handleExportData}>
+              <FiDownload />
+              Export Data
+            </Button>
+            
+            <FileLabel htmlFor="import-file">
+              <FiUpload />
+              Import Data
+            </FileLabel>
+            <FileInput
+              type="file"
+              id="import-file"
+              accept=".json"
+              onChange={handleImportData}
+            />
+          </ButtonGrid>
 
-          <ButtonGroup>
-            <Button onClick={() => handleExportData('json')}>
-              <FiDownload />
-              Export JSON
+          <AdvancedSection>
+            <AdvancedTitle>Advanced Options</AdvancedTitle>
+            
+            <WarningBox>
+              <WarningTitle>Danger Zone</WarningTitle>
+              <WarningText>
+                This action will permanently delete all your data including transactions, budgets, and goals. This cannot be undone.
+              </WarningText>
+            </WarningBox>
+
+            <Button 
+              onClick={handleClearData}
+              style={{ 
+                backgroundColor: 'var(--danger)', 
+                color: 'var(--text-inverse)',
+                borderColor: 'var(--danger)'
+              }}
+            >
+              Clear All Data
             </Button>
-            <Button onClick={() => handleExportData('csv')}>
-              <FiDownload />
-              Export CSV
-            </Button>
-            <Button variant="danger" onClick={handleResetData}>
-              <FiTrash2 />
-              Reset All Data
-            </Button>
-          </ButtonGroup>
+          </AdvancedSection>
         </SettingsSection>
       </SettingsContainer>
-    </PageLayout>
-  )
-}
+    </Layout>
+  );
+};
 
-export default Settings 
+export default Settings; 

@@ -1,32 +1,34 @@
-import React from 'react'
-import styled from 'styled-components'
-import Layout from '../layouts/Layout'
-import { useAppContext } from '../context/AppContext'
+import React from 'react';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import Layout from '../layouts/Layout';
 import { 
   FiTrendingUp, 
   FiTrendingDown, 
   FiDollarSign, 
-  FiTarget,
   FiCreditCard,
-  FiPieChart,
   FiPlus,
-  FiArrowRight
-} from 'react-icons/fi'
+  FiTarget,
+  FiBarChart2,
+  FiList,
+  FiArrowUpRight,
+  FiArrowDownRight
+} from 'react-icons/fi';
 
-const DashboardContainer = styled.div`
+const DashboardContainer = styled(motion.div)`
   display: flex;
   flex-direction: column;
   gap: var(--space-2xl);
-`
+`;
 
-const StatsGrid = styled.div`
+const StatsGrid = styled(motion.div)`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--space-xl);
   margin-bottom: var(--space-2xl);
-`
+`;
 
-const StatCard = styled.div`
+const StatCard = styled(motion.div)`
   background-color: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
@@ -36,145 +38,276 @@ const StatCard = styled.div`
   gap: var(--space-lg);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-`
-
-const StatIcon = styled.div`
-  width: 56px;
-  height: 56px;
-  background-color: ${props => props.color || 'var(--accent-primary-light)'};
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: ${props => props.textColor || 'var(--accent-primary)'};
-  flex-shrink: 0;
-`
-
-const StatInfo = styled.div`
-  flex: 1;
-  min-width: 0;
-`
-
-const StatValue = styled.div`
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--space-xs);
-  line-height: 1;
-`
-
-const StatLabel = styled.div`
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
-`
-
-const QuickActionsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-xl);
-  margin-bottom: var(--space-2xl);
-`
-
-const QuickActionCard = styled.div`
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: ${props => props.gradient || 'var(--accent-primary)'};
+    transition: height var(--transition-fast);
+  }
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    border-color: var(--accent-primary);
+    
+    &::before {
+      height: 4px;
+    }
   }
-`
+`;
 
-const QuickActionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-`
-
-const QuickActionIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background-color: var(--accent-primary-light);
+const StatIcon = styled(motion.div)`
+  width: 50px;
+  height: 50px;
+  background: ${props => props.bgColor || 'var(--accent-primary-light)'};
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  color: var(--accent-primary);
-`
-
-const ActionTitle = styled.h3`
-  color: var(--text-primary);
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-`
-
-const ActionDescription = styled.p`
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  margin: 0 0 var(--space-md) 0;
-  line-height: 1.5;
-`
-
-const ActionButton = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  color: var(--accent-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  color: ${props => props.iconColor || 'var(--accent-primary)'};
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+    background: ${props => props.hoverGradient};
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  
+  &:hover::before {
+    opacity: 0.1;
+  }
   
   svg {
-    transition: transform var(--transition-fast);
+    position: relative;
+    z-index: 1;
   }
-  
-  ${QuickActionCard}:hover & svg {
-    transform: translateX(4px);
-  }
-`
+`;
 
-const RecentSection = styled.div`
+const StatInfo = styled(motion.div)`
+  flex: 1;
+`;
+
+const StatValue = styled(motion.div)`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+`;
+
+const StatLabel = styled(motion.div)`
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+`;
+
+const SectionGrid = styled(motion.div)`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const Section = styled(motion.div)`
   background-color: var(--bg-card);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
+  padding: var(--space-2xl);
   box-shadow: var(--shadow-sm);
-`
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+    opacity: 0.7;
+  }
+`;
 
-const SectionHeader = styled.div`
+const SectionHeader = styled(motion.div)`
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--space-xl);
-`
+`;
 
-const SectionTitle = styled.h2`
+const SectionTitle = styled(motion.h2)`
   color: var(--text-primary);
   font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-`
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  
+  svg {
+    color: var(--accent-primary);
+  }
+`;
 
-const ViewAllButton = styled.button`
+const QuickActionsGrid = styled(motion.div)`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+`;
+
+const QuickActionCard = styled(motion.button)`
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent-primary), var(--primary));
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  
+  &:hover {
+    background-color: var(--accent-primary-light);
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    
+    &::before {
+      opacity: 0.05;
+    }
+  }
+  
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+`;
+
+const ActionIcon = styled(motion.div)`
+  width: 40px;
+  height: 40px;
+  background: ${props => props.bgColor};
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-inverse);
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-sm);
+`;
+
+const ActionTitle = styled(motion.div)`
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+`;
+
+const TransactionsList = styled(motion.div)`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+`;
+
+const TransactionItem = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  
+  &:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+`;
+
+const TransactionIcon = styled(motion.div)`
+  width: 36px;
+  height: 36px;
+  background-color: ${props => 
+    props.type === 'income' 
+      ? 'var(--success-light)' 
+      : 'var(--danger-light)'
+  };
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: ${props => 
+    props.type === 'income' 
+      ? 'var(--success)' 
+      : 'var(--danger)'
+  };
+  border: 2px solid ${props => 
+    props.type === 'income' 
+      ? 'var(--success)' 
+      : 'var(--danger)'
+  };
+`;
+
+const TransactionDetails = styled(motion.div)`
+  flex: 1;
+  min-width: 0;
+`;
+
+const TransactionTitle = styled(motion.div)`
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const TransactionCategory = styled(motion.div)`
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+`;
+
+const TransactionAmount = styled(motion.div)`
+  color: ${props => 
+    props.type === 'income' 
+      ? 'var(--success)' 
+      : 'var(--danger)'
+  };
+  font-weight: 600;
+  font-size: 0.875rem;
+`;
+
+const ViewAllButton = styled(motion.button)`
   background: none;
   border: none;
   color: var(--accent-primary);
-  font-size: 0.875rem;
   font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -183,236 +316,321 @@ const ViewAllButton = styled.button`
   
   &:hover {
     color: var(--accent-primary-hover);
+    transform: translateX(2px);
   }
-`
+`;
 
-const TransactionsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-`
+// Animation variants (same as before)
+const containerVariants = {
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      staggerChildren: 0.1,
+    },
+  },
+};
 
-const TransactionItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  background-color: var(--bg-tertiary);
-  transition: all var(--transition-fast);
-  
-  &:hover {
-    background-color: var(--bg-secondary);
-  }
-`
+const statsGridVariants = {
+  initial: {
+    opacity: 0,
+    y: 20,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      staggerChildren: 0.1,
+    },
+  },
+};
 
-const TransactionIcon = styled.div`
-  width: 40px;
-  height: 40px;
-  background-color: ${props => props.type === 'income' ? 'var(--success-light)' : 'var(--danger-light)'};
-  color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.125rem;
-  flex-shrink: 0;
-`
+const cardVariants = {
+  initial: {
+    opacity: 0,
+    y: 30,
+    scale: 0.95,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+  hover: {
+    y: -4,
+    transition: {
+      duration: 0.2,
+    },
+  },
+  tap: {
+    scale: 0.98,
+  },
+};
 
-const TransactionInfo = styled.div`
-  flex: 1;
-  min-width: 0;
-`
+const iconVariants = {
+  initial: {
+    scale: 0,
+    rotate: -180,
+  },
+  animate: {
+    scale: 1,
+    rotate: 0,
+    transition: {
+      duration: 0.5,
+      delay: 0.2,
+      ease: "easeOut",
+    },
+  },
+  hover: {
+    scale: 1.1,
+    transition: {
+      duration: 0.2,
+    },
+  },
+};
 
-const TransactionTitle = styled.div`
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.875rem;
-  margin-bottom: var(--space-xs);
-`
-
-const TransactionCategory = styled.div`
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-`
-
-const TransactionAmount = styled.div`
-  color: ${props => props.type === 'income' ? 'var(--success)' : 'var(--danger)'};
-  font-weight: 700;
-  font-size: 1rem;
-  text-align: right;
-`
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: var(--space-3xl) var(--space-xl);
-  color: var(--text-secondary);
-  
-  svg {
-    margin-bottom: var(--space-lg);
-    opacity: 0.5;
-  }
-`
+const transactionVariants = {
+  initial: {
+    opacity: 0,
+    x: -20,
+  },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.3,
+    },
+  },
+  hover: {
+    x: 4,
+    transition: {
+      duration: 0.2,
+    },
+  },
+};
 
 const Dashboard = () => {
-  const { state } = useAppContext()
-
   // Mock data for demonstration
-  const mockTransactions = [
+  const mockStats = {
+    totalIncome: 4950.00,
+    totalExpenses: 2847.50,
+    netBalance: 2102.50,
+    totalTransactions: 28
+  };
+
+  const mockRecentTransactions = [
     { id: 1, title: 'Salary Payment', amount: 4200, type: 'income', category: 'Salary', date: '2024-01-15' },
     { id: 2, title: 'Grocery Shopping', amount: 85.50, type: 'expense', category: 'Food & Dining', date: '2024-01-14' },
     { id: 3, title: 'Freelance Work', amount: 750, type: 'income', category: 'Freelance', date: '2024-01-13' },
     { id: 4, title: 'Gas Station', amount: 45.20, type: 'expense', category: 'Transportation', date: '2024-01-12' },
-    { id: 5, title: 'Coffee Shop', amount: 12.50, type: 'expense', category: 'Food & Dining', date: '2024-01-11' }
-  ]
-
-  const transactions = state.transactions.length > 0 ? state.transactions : mockTransactions
-  const recentTransactions = transactions.slice(0, 5)
-
-  // Calculate stats
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-  
-  const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + parseFloat(t.amount), 0)
-  
-  const netBalance = totalIncome - totalExpenses
-  const totalTransactions = transactions.length
+    { id: 5, title: 'Online Purchase', amount: 120, type: 'expense', category: 'Shopping', date: '2024-01-11' },
+  ];
 
   const quickActions = [
-    {
-      icon: FiPlus,
-      title: 'Add Transaction',
-      description: 'Record a new income or expense',
-      action: () => console.log('Add transaction')
+    { 
+      icon: FiPlus, 
+      title: 'Add Transaction', 
+      bgColor: 'linear-gradient(135deg, var(--primary), var(--accent))'
     },
-    {
-      icon: FiTarget,
-      title: 'Set Budget',
-      description: 'Create or update your monthly budget',
-      action: () => console.log('Set budget')
+    { 
+      icon: FiTarget, 
+      title: 'Set Budget', 
+      bgColor: 'linear-gradient(135deg, var(--accent), var(--secondary))'
     },
-    {
-      icon: FiTrendingUp,
-      title: 'View Analytics',
-      description: 'Analyze your spending patterns',
-      action: () => console.log('View analytics')
+    { 
+      icon: FiBarChart2, 
+      title: 'View Analytics', 
+      bgColor: 'linear-gradient(135deg, var(--secondary), var(--primary))'
     },
-    {
-      icon: FiCreditCard,
-      title: 'All Transactions',
-      description: 'View complete transaction history',
-      action: () => console.log('View transactions')
-    }
-  ]
+    { 
+      icon: FiList, 
+      title: 'All Transactions', 
+      bgColor: 'linear-gradient(135deg, var(--primary), var(--accent))'
+    },
+  ];
 
   return (
     <Layout title="Dashboard">
-      <DashboardContainer>
-        {/* Stats Overview */}
-        <StatsGrid>
-          <StatCard>
-            <StatIcon color="var(--success-light)" textColor="var(--success)">
+      <DashboardContainer
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+      >
+        {/* Stats Cards */}
+        <StatsGrid
+          variants={statsGridVariants}
+          initial="initial"
+          animate="animate"
+        >
+          <StatCard
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+            gradient="linear-gradient(90deg, var(--success), var(--primary))"
+          >
+            <StatIcon 
+              bgColor="var(--success-light)" 
+              iconColor="var(--success)"
+              hoverGradient="linear-gradient(135deg, var(--success), var(--primary))"
+              variants={iconVariants}
+            >
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>
-              <StatValue>${totalIncome.toFixed(2)}</StatValue>
+              <StatValue>${mockStats.totalIncome.toFixed(2)}</StatValue>
               <StatLabel>Total Income</StatLabel>
             </StatInfo>
           </StatCard>
 
-          <StatCard>
-            <StatIcon color="var(--danger-light)" textColor="var(--danger)">
+          <StatCard
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+            gradient="linear-gradient(90deg, var(--danger), var(--danger-dark))"
+          >
+            <StatIcon 
+              bgColor="var(--danger-light)" 
+              iconColor="var(--danger)"
+              hoverGradient="linear-gradient(135deg, var(--danger), var(--danger-dark))"
+              variants={iconVariants}
+            >
               <FiTrendingDown />
             </StatIcon>
             <StatInfo>
-              <StatValue>${totalExpenses.toFixed(2)}</StatValue>
+              <StatValue>${mockStats.totalExpenses.toFixed(2)}</StatValue>
               <StatLabel>Total Expenses</StatLabel>
             </StatInfo>
           </StatCard>
 
-          <StatCard>
-            <StatIcon color="var(--accent-primary-light)" textColor="var(--accent-primary)">
+          <StatCard
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+            gradient="linear-gradient(90deg, var(--accent), var(--primary))"
+          >
+            <StatIcon 
+              bgColor="var(--accent-primary-light)" 
+              iconColor="var(--accent-primary)"
+              hoverGradient="linear-gradient(135deg, var(--accent), var(--primary))"
+              variants={iconVariants}
+            >
               <FiDollarSign />
             </StatIcon>
             <StatInfo>
-              <StatValue style={{ color: netBalance >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-                ${netBalance.toFixed(2)}
-              </StatValue>
+              <StatValue>${mockStats.netBalance.toFixed(2)}</StatValue>
               <StatLabel>Net Balance</StatLabel>
             </StatInfo>
           </StatCard>
 
-          <StatCard>
-            <StatIcon color="var(--info-light)" textColor="var(--info)">
-              <FiPieChart />
+          <StatCard
+            variants={cardVariants}
+            whileHover="hover"
+            whileTap="tap"
+            gradient="linear-gradient(90deg, var(--info), var(--info-dark))"
+          >
+            <StatIcon 
+              bgColor="var(--info-light)" 
+              iconColor="var(--info)"
+              hoverGradient="linear-gradient(135deg, var(--info), var(--info-dark))"
+              variants={iconVariants}
+            >
+              <FiCreditCard />
             </StatIcon>
             <StatInfo>
-              <StatValue>{totalTransactions}</StatValue>
+              <StatValue>{mockStats.totalTransactions}</StatValue>
               <StatLabel>Total Transactions</StatLabel>
             </StatInfo>
           </StatCard>
         </StatsGrid>
 
-        {/* Quick Actions */}
-        <QuickActionsGrid>
-          {quickActions.map((action, index) => (
-            <ActionCard key={index} onClick={action.action}>
-              <ActionHeader>
-                <ActionIcon>
-                  <action.icon />
-                </ActionIcon>
-                <ActionTitle>{action.title}</ActionTitle>
-              </ActionHeader>
-              <ActionDescription>{action.description}</ActionDescription>
-              <ActionButton>
-                Get started <FiArrowRight />
-              </ActionButton>
-            </ActionCard>
-          ))}
-        </QuickActionsGrid>
+        {/* Main Content Sections */}
+        <SectionGrid>
+          {/* Quick Actions */}
+          <Section
+            variants={cardVariants}
+            initial="initial"
+            animate="animate"
+          >
+            <SectionHeader>
+              <SectionTitle>
+                <FiPlus />
+                Quick Actions
+              </SectionTitle>
+            </SectionHeader>
+            
+            <QuickActionsGrid>
+              {quickActions.map((action, index) => (
+                <QuickActionCard
+                  key={index}
+                  variants={cardVariants}
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <ActionIcon
+                    variants={iconVariants}
+                    bgColor={action.bgColor}
+                  >
+                    <action.icon />
+                  </ActionIcon>
+                  <ActionTitle>{action.title}</ActionTitle>
+                </QuickActionCard>
+              ))}
+            </QuickActionsGrid>
+          </Section>
 
-        {/* Recent Transactions */}
-        <RecentSection>
-          <SectionHeader>
-            <SectionTitle>Recent Transactions</SectionTitle>
-            <ViewAllButton>
-              View all <FiArrowRight />
-            </ViewAllButton>
-          </SectionHeader>
-
-          {recentTransactions.length > 0 ? (
+          {/* Recent Transactions */}
+          <Section
+            variants={cardVariants}
+            initial="initial"
+            animate="animate"
+          >
+            <SectionHeader>
+              <SectionTitle>
+                <FiCreditCard />
+                Recent Transactions
+              </SectionTitle>
+              <ViewAllButton>
+                View All
+                <FiArrowUpRight />
+              </ViewAllButton>
+            </SectionHeader>
+            
             <TransactionsList>
-              {recentTransactions.map(transaction => (
-                <TransactionItem key={transaction.id}>
+              {mockRecentTransactions.map((transaction, index) => (
+                <TransactionItem
+                  key={transaction.id}
+                  variants={transactionVariants}
+                  initial="initial"
+                  animate="animate"
+                  whileHover="hover"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   <TransactionIcon type={transaction.type}>
-                    {transaction.type === 'income' ? <FiTrendingUp /> : <FiTrendingDown />}
+                    {transaction.type === 'income' ? <FiArrowUpRight /> : <FiArrowDownRight />}
                   </TransactionIcon>
-                  <TransactionInfo>
+                  <TransactionDetails>
                     <TransactionTitle>{transaction.title}</TransactionTitle>
                     <TransactionCategory>{transaction.category}</TransactionCategory>
-                  </TransactionInfo>
+                  </TransactionDetails>
                   <TransactionAmount type={transaction.type}>
-                    {transaction.type === 'income' ? '+' : '-'}${Math.abs(transaction.amount).toFixed(2)}
+                    {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
                   </TransactionAmount>
                 </TransactionItem>
               ))}
             </TransactionsList>
-          ) : (
-            <EmptyState>
-              <FiCreditCard size={48} />
-              <div>No transactions yet</div>
-              <div style={{ fontSize: '0.875rem', marginTop: 'var(--space-xs)' }}>
-                Start by adding your first transaction
-              </div>
-            </EmptyState>
-          )}
-        </RecentSection>
+          </Section>
+        </SectionGrid>
       </DashboardContainer>
     </Layout>
-  )
-}
+  );
+};
 
-export default Dashboard 
+export default Dashboard; 
