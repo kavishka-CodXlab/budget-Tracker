@@ -96,16 +96,7 @@ const LogoIcon = styled(motion.div)`
   }
 `;
 
-const LogoText = styled(motion.span)`
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  
-  @media (max-width: 480px) {
-    display: none;
-  }
-`;
+ 
 
 const RightSection = styled(motion.div)`
   display: flex;
@@ -245,16 +236,8 @@ const Header = ({ onMenuClick }) => {
           </MenuButton>
         </Tooltip>
         <Tooltip content="Go to Dashboard" position="bottom">
-          <Logo tabIndex={0} aria-label="Budget Tracker Home">
-            <LogoIcon
-              variants={logoIconVariants}
-              whileHover="hover"
-              whileTap="tap"
-            >
-              <FiDollarSign />
-            </LogoIcon>
-            <LogoText>Budget Tracker</LogoText>
-          </Logo>
+   
+
         </Tooltip>
       </LeftSection>
 

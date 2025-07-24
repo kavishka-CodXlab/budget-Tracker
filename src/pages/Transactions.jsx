@@ -484,6 +484,7 @@ const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [viewingTransaction, setViewingTransaction] = useState(null);
   const searchInputRef = useRef();
 
   // Keyboard shortcuts
@@ -787,6 +788,9 @@ const Transactions = () => {
                 
                 <TransactionCell>
                   <ActionButtons>
+                    <IconButton onClick={() => setViewingTransaction(transaction)} aria-label="View transaction">
+                      View
+                    </IconButton>
                     <IconButton onClick={() => handleEdit(transaction)} aria-label="Edit transaction">
                       <FiEdit3 />
                     </IconButton>
@@ -811,6 +815,27 @@ const Transactions = () => {
           )}
         </TransactionsTable>
 
+        {/* View Transaction Modal */}
+        {viewingTransaction && (
+          <ModalOverlay onClick={() => setViewingTransaction(null)}>
+            <Modal onClick={e => e.stopPropagation()}>
+              <ModalHeader>
+                <ModalTitle>View Transaction</ModalTitle>
+                <CloseButton onClick={() => setViewingTransaction(null)}>×</CloseButton>
+              </ModalHeader>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                <div><b>Title:</b> {viewingTransaction.title}</div>
+                <div><b>Amount:</b> {viewingTransaction.amount}</div>
+                <div><b>Type:</b> {viewingTransaction.type}</div>
+                <div><b>Category:</b> {viewingTransaction.category}</div>
+                <div><b>Date:</b> {new Date(viewingTransaction.date).toLocaleDateString()}</div>
+                {viewingTransaction.description && (
+                  <div><b>Description:</b> {viewingTransaction.description}</div>
+                )}
+              </div>
+            </Modal>
+          </ModalOverlay>
+        )}
         {/* Modal */}
         {showModal && (
           <ModalOverlay onClick={handleCloseModal}>

@@ -16,7 +16,8 @@ const MainContent = styled(motion.main)`
   flex: 1;
   margin-left: ${props => props.sidebarOpen ? '280px' : '0'};
   transition: margin-left var(--transition-normal);
-  
+  height: 100vh;
+  overflow: hidden;
   @media (max-width: 768px) {
     margin-left: 0;
   }
@@ -26,7 +27,8 @@ const ContentArea = styled(motion.div)`
   padding: var(--space-2xl);
   max-width: 1400px;
   margin: 0 auto;
-  
+  height: 100vh;
+  overflow-y: auto;
   @media (max-width: 768px) {
     padding: var(--space-lg);
   }
@@ -150,7 +152,6 @@ const Layout = ({ children, title }) => {
       
       <MainContent
         sidebarOpen={sidebarOpen}
-        // Removed animation props from MainContent
       >
         <Header 
           onMenuClick={toggleSidebar}

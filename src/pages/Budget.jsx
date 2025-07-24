@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { FiPlus, FiEdit3, FiTrash2, FiTarget, FiAlertCircle } from 'react-icons/fi';
+import { FiPlus, FiEdit3, FiTrash2, FiTarget, FiAlertCircle, FiCheckCircle, FiXCircle, FiCopy } from 'react-icons/fi';
 import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
+import Tooltip from '../components/Tooltip';
 
 const BudgetContainer = styled.div`
   display: flex;
@@ -361,15 +362,59 @@ const Budget = () => {
   const { state, actions } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
+  const searchInputRef = useRef();
 
-  // Mock spending data (in a real app, this would be calculated from transactions)
-  const mockSpending = {
-    'Food & Dining': 320.50,
-    'Transportation': 180.25,
-    'Shopping': 450.00,
-    'Utilities': 220.30,
-    'Entertainment': 150.75,
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'n' || e.key === 'N') {
+        setShowModal(true);
+      }
+      if (e.key === '/') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Calculate spending from real transactions
+  const transactions = state.transactions || [];
+  const getPeriodFilter = (period) => {
+    const now = new Date();
+    if (period === 'monthly') {
+      return tx => {
+        const txDate = new Date(tx.date);
+        return txDate.getFullYear() === now.getFullYear() && txDate.getMonth() === now.getMonth();
+      };
+    } else if (period === 'weekly') {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      return tx => {
+        const txDate = new Date(tx.date);
+        return txDate >= startOfWeek && txDate <= endOfWeek;
+      };
+    } else if (period === 'yearly') {
+      return tx => {
+        const txDate = new Date(tx.date);
+        return txDate.getFullYear() === now.getFullYear();
+      };
+    }
+    return () => true;
   };
+  const getSpentForBudget = (budget) => {
+    const periodFilter = getPeriodFilter(budget.period);
+    return transactions
+      .filter(tx => tx.category === budget.category && tx.type === 'expense' && periodFilter(tx))
+      .reduce((sum, tx) => sum + parseFloat(tx.amount), 0);
+  };
+  const totalBudgeted = budgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
+  const totalSpent = budgets.reduce((sum, budget) => sum + getSpentForBudget(budget), 0);
+  const totalRemaining = totalBudgeted - totalSpent;
 
   // Form validation rules
   const validationRules = {
@@ -416,11 +461,6 @@ const Budget = () => {
 
   // Use real budgets if available, otherwise use mock data
   const budgets = state.budgets.length > 0 ? state.budgets : mockBudgets;
-
-  // Calculate totals
-  const totalBudgeted = budgets.reduce((sum, budget) => sum + parseFloat(budget.amount), 0);
-  const totalSpent = Object.values(mockSpending).reduce((sum, amount) => sum + amount, 0);
-  const totalRemaining = totalBudgeted - totalSpent;
 
   // Handle form submission
   const onSubmit = async (formData) => {
@@ -477,7 +517,7 @@ const Budget = () => {
   };
 
   return (
-    <Layout title="Budget Planning">
+    <Layout title="Budget Planner">
       <BudgetContainer>
         {/* Budget Overview */}
         <BudgetOverview>
@@ -516,20 +556,20 @@ const Budget = () => {
         {/* Actions Bar */}
         <ActionsBar>
           <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Budget Categories</h2>
-          <ActionButton onClick={() => setShowModal(true)}>
-            <FiPlus />
-            Add Budget
-          </ActionButton>
+          <Tooltip content="Add new budget (Shortcut: N)" position="bottom">
+            <ActionButton onClick={() => setShowModal(true)} aria-label="Add new budget">
+              <FiPlus /> Add Budget
+            </ActionButton>
+          </Tooltip>
         </ActionsBar>
 
         {/* Budget List */}
         <BudgetList>
           {budgets.map(budget => {
-            const spent = mockSpending[budget.category] || 0;
+            const spent = getSpentForBudget(budget);
             const percentage = (spent / budget.amount) * 100;
             const remaining = budget.amount - spent;
             const isOverBudget = spent > budget.amount;
-
             return (
               <BudgetItem key={budget.id}>
                 <BudgetHeader>
@@ -541,19 +581,17 @@ const Budget = () => {
                     <BudgetAmount>${budget.amount} / {budget.period}</BudgetAmount>
                   </BudgetInfo>
                   <BudgetActions>
-                    <IconButton onClick={() => handleEdit(budget)}>
-                      <FiEdit3 />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(budget.id)}>
-                      <FiTrash2 />
-                    </IconButton>
+                    <Tooltip content="Edit budget" position="top">
+                      <IconButton onClick={() => handleEdit(budget)} aria-label="Edit budget"><FiEdit3 /></IconButton>
+                    </Tooltip>
+                    <Tooltip content="Delete budget" position="top">
+                      <IconButton onClick={() => handleDelete(budget.id)} aria-label="Delete budget"><FiTrash2 /></IconButton>
+                    </Tooltip>
                   </BudgetActions>
                 </BudgetHeader>
-
                 <ProgressBar>
                   <ProgressFill percentage={percentage} />
                 </ProgressBar>
-
                 <ProgressText>
                   <SpentAmount isOverBudget={isOverBudget}>
                     Spent: ${spent.toFixed(2)}
@@ -579,9 +617,7 @@ const Budget = () => {
           <ModalOverlay onClick={handleCloseModal}>
             <Modal onClick={(e) => e.stopPropagation()}>
               <ModalHeader>
-                <ModalTitle>
-                  {editingBudget ? 'Edit Budget' : 'Create New Budget'}
-                </ModalTitle>
+                <ModalTitle>{editingBudget ? 'Edit Budget' : 'Add New Budget'}</ModalTitle>
                 <CloseButton onClick={handleCloseModal}>×</CloseButton>
               </ModalHeader>
 
@@ -591,39 +627,47 @@ const Budget = () => {
               }}>
                 <FormGroup>
                   <Label htmlFor="category">Category</Label>
-                  <Select
-                    id="category"
-                    value={values.category}
-                    onChange={(e) => handleChange('category', e.target.value)}
-                    onBlur={() => handleBlur('category')}
-                  >
-                    <option value="">Select a category</option>
-                    {state.categories.expense.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </Select>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Select
+                      id="category"
+                      value={values.category}
+                      onChange={(e) => handleChange('category', e.target.value)}
+                      onBlur={() => handleBlur('category')}
+                      aria-invalid={!!errors.category}
+                      aria-describedby="category-error"
+                    >
+                      <option value="">Select a category</option>
+                      {Object.values(state.categories).flat().map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </Select>
+                    {touched.category && !errors.category && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.category && errors.category && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.category && errors.category && (
-                    <ErrorText>{errors.category}</ErrorText>
+                    <ErrorText id="category-error">{errors.category}</ErrorText>
                   )}
                 </FormGroup>
-
                 <FormGroup>
-                  <Label htmlFor="amount">Budget Amount</Label>
-                  <Input
-                    type="number"
-                    id="amount"
-                    placeholder="Enter budget amount"
-                    value={values.amount}
-                    onChange={(e) => handleChange('amount', e.target.value)}
-                    onBlur={() => handleBlur('amount')}
-                    step="0.01"
-                    min="0"
-                  />
+                  <Label htmlFor="amount">Amount</Label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="number"
+                      id="amount"
+                      placeholder="Enter budget amount"
+                      value={values.amount}
+                      onChange={(e) => handleChange('amount', e.target.value)}
+                      onBlur={() => handleBlur('amount')}
+                      aria-invalid={!!errors.amount}
+                      aria-describedby="amount-error"
+                    />
+                    {touched.amount && !errors.amount && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.amount && errors.amount && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.amount && errors.amount && (
-                    <ErrorText>{errors.amount}</ErrorText>
+                    <ErrorText id="amount-error">{errors.amount}</ErrorText>
                   )}
                 </FormGroup>
-
                 <FormGroup>
                   <Label htmlFor="period">Period</Label>
                   <Select
@@ -636,11 +680,7 @@ const Budget = () => {
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                   </Select>
-                  {touched.period && errors.period && (
-                    <ErrorText>{errors.period}</ErrorText>
-                  )}
                 </FormGroup>
-
                 <FormActions>
                   <CancelButton type="button" onClick={handleCloseModal}>
                     Cancel

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { FiPlus, FiTarget, FiTrendingUp, FiCalendar, FiDollarSign, FiEdit3, FiTrash2, FiCheck } from 'react-icons/fi';
+import { FiPlus, FiTarget, FiTrendingUp, FiCalendar, FiDollarSign, FiEdit3, FiTrash2, FiCheck, FiCheckCircle, FiXCircle, FiCopy } from 'react-icons/fi';
 import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
+import Tooltip from '../components/Tooltip';
 
 const GoalsContainer = styled.div`
   display: flex;
@@ -432,6 +433,19 @@ const Goals = () => {
   const { state, actions } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
+  const searchInputRef = useRef();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'n' || e.key === 'N') {
+        setShowModal(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Form validation rules
   const validationRules = {
@@ -632,6 +646,12 @@ const Goals = () => {
     reset();
   };
 
+  // Copy to clipboard
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    actions.addNotification('Copied to clipboard!', 'success');
+  };
+
   return (
     <Layout title="Financial Goals">
       <GoalsContainer>
@@ -681,10 +701,11 @@ const Goals = () => {
         {/* Actions Bar */}
         <ActionsBar>
           <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Your Goals</h2>
-          <ActionButton onClick={() => setShowModal(true)}>
-            <FiPlus />
-            Add Goal
-          </ActionButton>
+          <Tooltip content="Add new goal (Shortcut: N)" position="bottom">
+            <ActionButton onClick={() => setShowModal(true)} aria-label="Add new goal">
+              <FiPlus /> Add Goal
+            </ActionButton>
+          </Tooltip>
         </ActionsBar>
 
         {/* Goals Grid */}
@@ -699,6 +720,9 @@ const Goals = () => {
                 <GoalHeader>
                   <GoalInfo>
                     <GoalTitle>{goal.title}</GoalTitle>
+                    <Tooltip content="Copy title" position="top">
+                      <FiCopy style={{ cursor: 'pointer', marginLeft: 6 }} onClick={() => handleCopy(goal.title)} tabIndex={0} aria-label="Copy title" />
+                    </Tooltip>
                     <GoalDescription>{goal.description}</GoalDescription>
                     <GoalMeta>
                       <MetaItem>
@@ -716,12 +740,12 @@ const Goals = () => {
                         <FiCheck />
                       </IconButton>
                     )}
-                    <IconButton onClick={() => handleEdit(goal)}>
-                      <FiEdit3 />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(goal.id)}>
-                      <FiTrash2 />
-                    </IconButton>
+                    <Tooltip content="Edit goal" position="top">
+                      <IconButton onClick={() => handleEdit(goal)} aria-label="Edit goal"><FiEdit3 /></IconButton>
+                    </Tooltip>
+                    <Tooltip content="Delete goal" position="top">
+                      <IconButton onClick={() => handleDelete(goal.id)} aria-label="Delete goal"><FiTrash2 /></IconButton>
+                    </Tooltip>
                   </GoalActions>
                 </GoalHeader>
 
@@ -774,16 +798,22 @@ const Goals = () => {
               }}>
                 <FormGroup>
                   <Label htmlFor="title">Goal Title</Label>
-                  <Input
-                    type="text"
-                    id="title"
-                    placeholder="e.g., Emergency Fund, Vacation, New Car"
-                    value={values.title}
-                    onChange={(e) => handleChange('title', e.target.value)}
-                    onBlur={() => handleBlur('title')}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="text"
+                      id="title"
+                      placeholder="e.g., Emergency Fund, Vacation, New Car"
+                      value={values.title}
+                      onChange={(e) => handleChange('title', e.target.value)}
+                      onBlur={() => handleBlur('title')}
+                      aria-invalid={!!errors.title}
+                      aria-describedby="title-error"
+                    />
+                    {touched.title && !errors.title && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.title && errors.title && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.title && errors.title && (
-                    <ErrorText>{errors.title}</ErrorText>
+                    <ErrorText id="title-error">{errors.title}</ErrorText>
                   )}
                 </FormGroup>
 
@@ -803,18 +833,22 @@ const Goals = () => {
 
                 <FormGroup>
                   <Label htmlFor="targetAmount">Target Amount</Label>
-                  <Input
-                    type="number"
-                    id="targetAmount"
-                    placeholder="Enter target amount"
-                    value={values.targetAmount}
-                    onChange={(e) => handleChange('targetAmount', e.target.value)}
-                    onBlur={() => handleBlur('targetAmount')}
-                    step="0.01"
-                    min="0"
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Input
+                      type="number"
+                      id="targetAmount"
+                      placeholder="How much do you want to save?"
+                      value={values.targetAmount}
+                      onChange={(e) => handleChange('targetAmount', e.target.value)}
+                      onBlur={() => handleBlur('targetAmount')}
+                      aria-invalid={!!errors.targetAmount}
+                      aria-describedby="targetAmount-error"
+                    />
+                    {touched.targetAmount && !errors.targetAmount && <FiCheckCircle color="var(--success)" aria-label="Valid" />}
+                    {touched.targetAmount && errors.targetAmount && <FiXCircle color="var(--danger)" aria-label="Invalid" />}
+                  </div>
                   {touched.targetAmount && errors.targetAmount && (
-                    <ErrorText>{errors.targetAmount}</ErrorText>
+                    <ErrorText id="targetAmount-error">{errors.targetAmount}</ErrorText>
                   )}
                 </FormGroup>
 

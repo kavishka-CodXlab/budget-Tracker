@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { 
   PieChart, 
@@ -38,9 +38,9 @@ const ControlsSection = styled.div`
 `;
 
 const FilterButton = styled.button`
-  background-color: ${props => props.active ? 'var(--accent-primary)' : 'var(--bg-card)'};
-  color: ${props => props.active ? 'var(--text-inverse)' : 'var(--text-primary)'};
-  border: 1px solid ${props => props.active ? 'var(--accent-primary)' : 'var(--border-primary)'};
+  background-color: ${props => props.$active ? 'var(--accent-primary)' : 'var(--bg-card)'};
+  color: ${props => props.$active ? 'var(--text-inverse)' : 'var(--text-primary)'};
+  border: 1px solid ${props => props.$active ? 'var(--accent-primary)' : 'var(--border-primary)'};
   border-radius: var(--radius-md);
   padding: var(--space-sm) var(--space-md);
   font-size: 0.875rem;
@@ -49,7 +49,7 @@ const FilterButton = styled.button`
   transition: all var(--transition-fast);
   &:hover {
     border-color: var(--accent-primary);
-    ${props => !props.active && 'color: var(--accent-primary);'}
+    ${props => !props.$active && 'color: var(--accent-primary);'}
   }
 `;
 
@@ -79,13 +79,13 @@ const StatCard = styled.div`
 const StatIcon = styled.div`
   width: 50px;
   height: 50px;
-  background-color: ${props => props.color || 'var(--accent-primary-light)'};
+  background-color: ${props => props.$color || 'var(--accent-primary-light)'};
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: ${props => props.textColor || 'var(--accent-primary)'};
+  color: ${props => props.$textColor || 'var(--accent-primary)'};
 `;
 
 const StatInfo = styled.div`
@@ -181,8 +181,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 const Analytics = () => {
   const { state } = useAppContext();
   const [timeFilter, setTimeFilter] = useState('all');
-  
-  // Mock data for demonstration (in a real app, this would come from your backend)
+  const [loading, setLoading] = useState(true);
+  // Dummy/mock data for initial load
   const mockTransactions = [
     { id: 1, title: 'Salary', amount: 4200, type: 'income', category: 'Salary', date: '2024-01-15' },
     { id: 2, title: 'Groceries', amount: 85.50, type: 'expense', category: 'Food & Dining', date: '2024-01-14' },
@@ -193,14 +193,41 @@ const Analytics = () => {
     { id: 7, title: 'Investment', amount: 320, type: 'income', category: 'Investment', date: '2024-01-09' },
     { id: 8, title: 'Restaurant', amount: 65.80, type: 'expense', category: 'Food & Dining', date: '2024-01-08' },
   ];
-
-  // Use real transactions if available, otherwise use mock data
-  const transactions = state.transactions.length > 0 ? state.transactions : mockTransactions;
+  const [transactions, setTransactions] = useState(mockTransactions);
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => {
+      setTransactions(state.transactions.length > 0 ? state.transactions : mockTransactions);
+      setLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [state.transactions]);
 
   // Memoized calculations for performance
   const analyticsData = useMemo(() => {
+    // Filter transactions by selected time period
+    const now = new Date();
+    let filteredTx = transactions;
+    if (timeFilter === 'month') {
+      filteredTx = transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        return txDate.getFullYear() === now.getFullYear() && txDate.getMonth() === now.getMonth();
+      });
+    } else if (timeFilter === '3months') {
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      filteredTx = transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        return txDate >= threeMonthsAgo && txDate <= now;
+      });
+    } else if (timeFilter === 'year') {
+      filteredTx = transactions.filter(tx => {
+        const txDate = new Date(tx.date);
+        return txDate.getFullYear() === now.getFullYear();
+      });
+    }
+
     // Category breakdown for pie chart
-    const categoryTotals = transactions.reduce((acc, transaction) => {
+    const categoryTotals = filteredTx.reduce((acc, transaction) => {
       if (transaction.type === 'expense') {
         acc[transaction.category] = (acc[transaction.category] || 0) + parseFloat(transaction.amount);
       }
@@ -213,7 +240,7 @@ const Analytics = () => {
     }));
 
     // Monthly trends for line chart
-    const monthlyData = transactions.reduce((acc, transaction) => {
+    const monthlyData = filteredTx.reduce((acc, transaction) => {
       const month = new Date(transaction.date).toISOString().slice(0, 7);
       if (!acc[month]) {
         acc[month] = { month, income: 0, expense: 0 };
@@ -225,7 +252,7 @@ const Analytics = () => {
     const monthlyTrends = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 
     // Weekly spending for bar chart
-    const weeklyData = transactions
+    const weeklyData = filteredTx
       .filter(t => t.type === 'expense')
       .reduce((acc, transaction) => {
         const date = new Date(transaction.date);
@@ -240,11 +267,11 @@ const Analytics = () => {
     }));
 
     // Income vs Expense comparison
-    const totalIncome = transactions
+    const totalIncome = filteredTx
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
     
-    const totalExpense = transactions
+    const totalExpense = filteredTx
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
@@ -272,6 +299,20 @@ const Analytics = () => {
     { label: 'This Year', value: 'year' }
   ];
 
+  if (loading) {
+    return (
+      <Layout title="Financial Analytics">
+        <AnalyticsContainer>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
+            <div className="spinner" style={{ width: 48, height: 48, border: '4px solid #eaff6b', borderTop: '4px solid #7f5fff', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 16 }} />
+            <div style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Loading analytics...</div>
+            <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+          </div>
+        </AnalyticsContainer>
+      </Layout>
+    );
+  }
+
   return (
     <Layout title="Financial Analytics">
       <AnalyticsContainer>
@@ -284,7 +325,7 @@ const Analytics = () => {
           {timeFilters.map(filter => (
             <FilterButton
               key={filter.value}
-              active={timeFilter === filter.value}
+              $active={timeFilter === filter.value}
               onClick={() => setTimeFilter(filter.value)}
             >
               {filter.label}
@@ -295,7 +336,7 @@ const Analytics = () => {
         {/* Key Statistics */}
         <StatsGrid>
           <StatCard>
-            <StatIcon color="var(--success-light)" textColor="var(--success)">
+            <StatIcon $color="var(--success-light)" $textColor="var(--success)">
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>
@@ -305,7 +346,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--danger-light)" textColor="var(--danger)">
+            <StatIcon $color="var(--danger-light)" $textColor="var(--danger)">
               <FiTrendingDown />
             </StatIcon>
             <StatInfo>
@@ -315,7 +356,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--accent-primary-light)" textColor="var(--accent-primary)">
+            <StatIcon $color="var(--accent-primary-light)" $textColor="var(--accent-primary)">
               <FiDollarSign />
             </StatIcon>
             <StatInfo>
@@ -325,7 +366,7 @@ const Analytics = () => {
           </StatCard>
 
           <StatCard>
-            <StatIcon color="var(--warning-light)" textColor="var(--warning)">
+            <StatIcon $color="var(--warning-light)" $textColor="var(--warning)">
               <FiTrendingUp />
             </StatIcon>
             <StatInfo>

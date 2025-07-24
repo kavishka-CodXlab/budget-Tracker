@@ -1,65 +1,37 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
 import { 
   FiHome, 
   FiCreditCard, 
-  FiTarget, 
-  FiBarChart2, 
   FiTrendingUp, 
-  FiSettings,
-  FiX,
-  FiChevronLeft,
-  FiChevronRight
+  FiBarChart2, 
+  FiSettings, 
+  FiHelpCircle, 
+  FiLogOut, 
+  FiBook, 
+  FiPercent
 } from 'react-icons/fi';
 import Tooltip from './Tooltip';
+import Swal from 'sweetalert2';
 
-const CollapseButton = styled(motion.button)`
-  position: absolute;
-  top: 16px;
-  right: -18px;
-  z-index: 1100;
-  background: var(--bg-card);
-  border: 1px solid var(--border-primary);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  &:hover {
-    background: var(--accent-primary-light);
-    color: var(--accent-primary);
-    border-color: var(--accent-primary);
-  }
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const SidebarContainer = styled(motion.aside)`
+const SidebarContainer = styled.aside`
   position: fixed;
   top: 0;
   left: 0;
+  min-height: 100vh;
   height: 100vh;
-  width: ${props => (props.collapsed ? '72px' : '280px')};
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid var(--border-primary);
+  width: 270px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid #f3f4f6;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-lg);
-  transition: width var(--transition-normal), background-color var(--transition-normal);
+  box-shadow: 0 2px 16px rgba(80, 80, 180, 0.04);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(${props => props.$isOpen ? '0' : '-100%'});
   overflow-x: hidden;
-  @media (max-width: 768px) {
-    width: 280px;
-    transform: translateX(${props => props.isOpen ? '0' : '-100%'});
-  }
+
   @media (min-width: 769px) {
     position: relative;
     transform: none;
@@ -67,7 +39,24 @@ const SidebarContainer = styled(motion.aside)`
   }
 `;
 
-const SidebarHeader = styled(motion.div)`
+
+const MobileCloseButton = styled.button`
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #7b8494;
+  font-size: 1.7rem;
+  cursor: pointer;
+  z-index: 1101;
+  display: block;
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const SidebarHeader = styled.div`
   padding: var(--space-xl);
   border-bottom: 1px solid var(--border-primary);
   display: flex;
@@ -83,7 +72,7 @@ const HeaderTitle = styled.div`
   font-size: 1.125rem;
 `;
 
-const CloseButton = styled(motion.button)`
+const CloseButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,18 +95,17 @@ const CloseButton = styled(motion.button)`
   }
 `;
 
-const SidebarContent = styled(motion.div)`
+const SidebarContent = styled.div`
   flex: 1;
-  overflow-y: auto;
-  padding: var(--space-xl) 0;
+  padding: var(--space-l) 0;
   background-color: var(--bg-sidebar);
 `;
 
-const NavigationSection = styled(motion.div)`
+const NavigationSection = styled.div`
   margin-bottom: var(--space-2xl);
 `;
 
-const SectionTitle = styled(motion.h3)`
+const SectionTitle = styled.h3`
   color: var(--text-tertiary);
   font-size: 0.75rem;
   font-weight: 600;
@@ -127,70 +115,54 @@ const SectionTitle = styled(motion.h3)`
   padding-bottom: var(--space-sm);
 `;
 
-const NavigationList = styled(motion.ul)`
+const NavigationList = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
 `;
 
-const NavigationItem = styled(motion.li)`
+const NavigationItem = styled.li`
   margin: 0;
 `;
 
 const NavigationLink = styled(NavLink)`
   display: flex;
   align-items: center;
-  gap: ${props => (props.collapsed ? '0' : 'var(--space-md)')};
-  padding: var(--space-lg) var(--space-xl);
-  color: var(--text-secondary);
+  gap: 18px;
+  padding: 0 32px;
+  color: #7b8494;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all var(--transition-fast);
-  position: relative;
-  margin: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-md);
-  justify-content: ${props => (props.collapsed ? 'center' : 'flex-start')};
-  
+  font-weight: 600;
+  font-size: 1.08rem;
+  border-radius: 14px;
+  margin: 0 12px 8px 12px;
+  height: 48px;
+  min-height: 48px;
+  box-sizing: border-box;
+  line-height: 1;
+  transition: background 0.18s, color 0.18s, font-weight 0.18s;
   &:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    transform: translateX(2px);
+    background: #f3f4f6;
+    color: #23232b;
   }
-  
   &.active {
-    background: linear-gradient(135deg, var(--accent-primary-light), var(--accent-primary-light));
-    color: var(--accent-primary);
-    font-weight: 600;
-    border: 1px solid var(--accent-primary);
-    box-shadow: var(--shadow-sm);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 20px;
-      background-color: var(--accent-primary);
-      border-radius: 0 2px 2px 0;
-    }
-    
-    svg {
-      color: var(--accent-primary);
+    background: #eaff6b;
+    color: #23232b;
+    font-weight: 700;
+    box-shadow: 0 2px 8px 0 rgba(200,220,80,0.08);
+    & svg {
+      color: #23232b;
     }
   }
 `;
 
-const IconWrapper = styled(motion.div)`
+const IconWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.125rem;
-  transition: all var(--transition-fast);
-  width: 20px;
-  height: 20px;
+  font-size: 1.25rem;
+  width: 28px;
+  height: 28px;
 `;
 
 const LabelSpan = styled.span`
@@ -198,251 +170,128 @@ const LabelSpan = styled.span`
   transition: display 0.2s;
 `;
 
-// Animation variants
-const sidebarVariants = {
-  open: {
-    x: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
-    },
-  },
-  closed: {
-    x: -280,
-    transition: {
-      duration: 0.3,
-      ease: "easeIn",
-      staggerChildren: 0.02,
-      staggerDirection: -1,
-    },
-  },
-};
-
-const headerVariants = {
-  open: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-    },
-  },
-  closed: {
-    opacity: 0,
-    y: -20,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-const contentVariants = {
-  open: {
-    opacity: 1,
-    transition: {
-      duration: 0.3,
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-  closed: {
-    opacity: 0,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-const sectionVariants = {
-  open: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      staggerChildren: 0.05,
-    },
-  },
-  closed: {
-    opacity: 0,
-    y: 20,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  open: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.3,
-    },
-  },
-  closed: {
-    opacity: 0,
-    x: -20,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-const iconVariants = {
-  hover: {
-    scale: 1.1,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  tap: {
-    scale: 0.9,
-  },
-};
-
-const closeButtonVariants = {
-  hover: {
-    scale: 1.1,
-    rotate: 90,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  tap: {
-    scale: 0.9,
-  },
-};
+const SidebarLogo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0 24px 0;
+  justify-content: center;
+`;
+const LogoImg = styled.div`
+  width: 38px;
+  height: 38px;
+  background: #23232b;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  color: #fff;
+  font-family: 'Pacifico', cursive;
+`;
+const LogoText = styled.span`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+`;
+const BottomSection = styled.div`
+  margin-top: auto;
+  padding-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+const BottomLink = styled(NavLink)`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 32px;
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    background: #f3f4f6;
+    color: #23232b;
+  }
+`;
 
 const SideBar = ({ isOpen, onClose }) => {
-  const [collapsed, setCollapsed] = useState(false);
   const navigationData = [
-    {
-      section: 'Overview',
-      items: [
-        { to: '/', icon: FiHome, label: 'Dashboard' },
-        { to: '/transactions', icon: FiCreditCard, label: 'Transactions' },
-      ]
-    },
-    {
-      section: 'Planning',
-      items: [
-        { to: '/budget', icon: FiTarget, label: 'Budget' },
-        { to: '/goals', icon: FiTrendingUp, label: 'Goals' },
-      ]
-    },
-    {
-      section: 'Analytics',
-      items: [
-        { to: '/analytics', icon: FiBarChart2, label: 'Analytics' },
-      ]
-    },
-    {
-      section: 'Settings',
-      items: [
-        { to: '/settings', icon: FiSettings, label: 'Settings' },
-      ]
-    }
+    { to: '/', icon: FiHome, label: 'Dashboard' },
+    { to: '/transactions', icon: FiCreditCard, label: 'Transactions' },
+    { to: '/goals', icon: FiTrendingUp, label: 'Goals' },
+    { to: '/analytics', icon: FiBarChart2, label: 'Analytics' },
+    { to: '/halal-guide', icon: FiBook, label: 'Halal Guide' },
+    { to: '/zakat-calculator', icon: FiPercent, label: 'Zakat Calculator' },
+    { to: '/settings', icon: FiSettings, label: 'Settings' },
+
   ];
 
-  // Keyboard navigation: Enter/Space on nav links
-  const handleNavKeyDown = (e, to, onClick) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      if (onClick) onClick();
-      window.location.href = to;
-    }
+  const handleLogout = (e) => {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Are you sure you want to logout?',
+      text: 'All your local data will be cleared.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#eaff6b',
+      cancelButtonColor: '#23232b',
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel',
+      background: '#23232b',
+      color: '#fff',
+      customClass: {
+        popup: 'swal2-custom',
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.clear();
+        window.location.reload();
+      }
+    });
   };
 
   return (
-    <AnimatePresence>
-      {(isOpen || window.innerWidth > 768) && (
-        <SidebarContainer
-          isOpen={isOpen}
-          collapsed={collapsed}
-          variants={sidebarVariants}
-          initial="closed"
-          animate="open"
-          exit="closed"
-        >
-          <SidebarHeader
-            variants={headerVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
+    <SidebarContainer $isOpen={isOpen}>
+      <MobileCloseButton onClick={onClose} aria-label="Close sidebar">&times;</MobileCloseButton>
+      <SidebarLogo>
+        <LogoImg>M</LogoImg>
+        <LogoText>Mitchell</LogoText>
+      </SidebarLogo>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {navigationData.map((item) => (
+          <NavigationLink
+            key={item.to}
+            to={item.to}
+            onClick={() => window.innerWidth <= 768 && onClose()}
+            {...(item.to === '/' ? { end: true } : {})}  
+            aria-label={item.label}
+            tabIndex={0}
           >
-            <HeaderTitle>Navigation</HeaderTitle>
-            <Tooltip content={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} position="right">
-              <CollapseButton
-                onClick={() => setCollapsed(c => !c)}
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                tabIndex={0}
-              >
-                {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
-              </CollapseButton>
-            </Tooltip>
-            <Tooltip content="Close sidebar" position="right">
-              <CloseButton
-                onClick={onClose}
-                variants={closeButtonVariants}
-                whileHover="hover"
-                whileTap="tap"
-                aria-label="Close sidebar"
-              >
-                <FiX />
-              </CloseButton>
-            </Tooltip>
-          </SidebarHeader>
-
-          <SidebarContent
-            variants={contentVariants}
-            initial="closed"
-            animate="open"
-            exit="closed"
-          >
-            {navigationData.map((section) => (
-              <NavigationSection
-                key={section.section}
-                variants={sectionVariants}
-              >
-                <SectionTitle variants={itemVariants}>
-                  <LabelSpan collapsed={collapsed}>{section.section}</LabelSpan>
-                </SectionTitle>
-                <NavigationList>
-                  {section.items.map((item) => (
-                    <NavigationItem
-                      key={item.to}
-                      variants={itemVariants}
-                    >
-                      <Tooltip content={item.label} position="right">
-                        <NavigationLink
-                          to={item.to}
-                          onClick={() => window.innerWidth <= 768 && onClose()}
-                          end={item.to === '/'}
-                          aria-label={item.label}
-                          tabIndex={0}
-                          onKeyDown={e => handleNavKeyDown(e, item.to, () => window.innerWidth <= 768 && onClose())}
-                          collapsed={collapsed}
-                        >
-                          <IconWrapper
-                            variants={iconVariants}
-                            whileHover="hover"
-                            whileTap="tap"
-                          >
-                            <item.icon />
-                          </IconWrapper>
-                          <LabelSpan collapsed={collapsed}>{item.label}</LabelSpan>
-                        </NavigationLink>
-                      </Tooltip>
-                    </NavigationItem>
-                  ))}
-                </NavigationList>
-              </NavigationSection>
-            ))}
-          </SidebarContent>
-        </SidebarContainer>
-      )}
-    </AnimatePresence>
+            <IconWrapper>
+              <item.icon />
+            </IconWrapper>
+            <span>{item.label}</span>
+          </NavigationLink>
+        ))}
+      </nav>
+      <BottomSection>
+        <BottomLink to="/help">
+          <IconWrapper><FiHelpCircle /></IconWrapper>
+          Help
+        </BottomLink>
+        <BottomLink as="a" href="#" onClick={handleLogout}>
+          <IconWrapper><FiLogOut /></IconWrapper>
+          Logout
+        </BottomLink>
+      </BottomSection>
+    </SidebarContainer>
   );
 };
 

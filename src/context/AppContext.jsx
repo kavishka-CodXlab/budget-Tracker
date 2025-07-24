@@ -30,7 +30,10 @@ const initialState = {
     sidebarOpen: false,
     loading: false,
     notifications: []
-  }
+  },
+  
+  // Card details
+  cards: []
 };
 
 // Action types
@@ -59,7 +62,11 @@ export const ACTIONS = {
   SET_SIDEBAR: 'SET_SIDEBAR',
   SET_LOADING: 'SET_LOADING',
   ADD_NOTIFICATION: 'ADD_NOTIFICATION',
-  REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION'
+  REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION',
+  
+  // Card actions
+  SET_CARDS: 'SET_CARDS',
+  UPDATE_CARD: 'UPDATE_CARD'
 };
 
  
@@ -175,6 +182,18 @@ const appReducer = (state, action) => {
         }
       };
       
+    case ACTIONS.SET_CARDS:
+      return {
+        ...state,
+        cards: action.payload
+      };
+      
+    case ACTIONS.UPDATE_CARD:
+      return {
+        ...state,
+        cards: state.cards.map((card, idx) => idx === action.payload.idx ? action.payload.card : card)
+      };
+      
     default:
       return state;
   }
@@ -212,16 +231,39 @@ const saveToLocalStorage = (key, data) => {
   }
 };
 
+// Helper function to check if localStorage is empty for a key
+const isLocalStorageEmpty = (key) => {
+  try {
+    const saved = localStorage.getItem(key);
+    return !saved || saved === '[]' || saved === '{}';
+  } catch {
+    return true;
+  }
+};
+
 // Provider component
 export const AppProvider = ({ children }) => {
+  const shouldSeed = isLocalStorageEmpty('budgetTracker_transactions') && isLocalStorageEmpty('budgetTracker_goals');
+  const halalSampleTransactions = [
+    { id: '1', title: 'Salary Payment', amount: 3000, type: 'income', category: 'Salary', date: '2024-06-01', description: 'Monthly salary (halal)' },
+    { id: '2', title: 'Grocery Shopping', amount: 120, type: 'expense', category: 'Food & Dining', date: '2024-06-02', description: 'Groceries for family' },
+    { id: '3', title: 'Charity (Zakat)', amount: 200, type: 'expense', category: 'Charity', date: '2024-06-03', description: 'Zakat payment' },
+    { id: '4', title: 'Freelance Project', amount: 800, type: 'income', category: 'Freelance', date: '2024-06-04', description: 'Web development (halal)' },
+    { id: '5', title: 'Utilities Bill', amount: 90, type: 'expense', category: 'Utilities', date: '2024-06-05', description: 'Electricity and water' }
+  ];
+  const halalSampleGoals = [
+    { id: 'g1', title: 'Umrah Savings', description: 'Save for Umrah trip', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-01', createdAt: '2024-06-01' },
+    { id: 'g2', title: 'Emergency Fund', description: 'Halal emergency fund', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', createdAt: '2024-06-01' }
+  ];
   // Load initial state from localStorage
   const loadedState = {
     ...initialState,
     user: loadFromLocalStorage('budgetTracker_user', initialState.user),
-    transactions: loadFromLocalStorage('budgetTracker_transactions', initialState.transactions),
+    transactions: shouldSeed ? halalSampleTransactions : loadFromLocalStorage('budgetTracker_transactions', initialState.transactions),
     budgets: loadFromLocalStorage('budgetTracker_budgets', initialState.budgets),
-    goals: loadFromLocalStorage('budgetTracker_goals', initialState.goals),
-    categories: loadFromLocalStorage('budgetTracker_categories', initialState.categories)
+    goals: shouldSeed ? halalSampleGoals : loadFromLocalStorage('budgetTracker_goals', initialState.goals),
+    categories: loadFromLocalStorage('budgetTracker_categories', initialState.categories),
+    cards: loadFromLocalStorage('budgetTracker_cards', initialState.cards)
   };
   
   const [state, dispatch] = useReducer(appReducer, loadedState);
@@ -246,6 +288,10 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     saveToLocalStorage('budgetTracker_categories', state.categories);
   }, [state.categories]);
+
+  useEffect(() => {
+    saveToLocalStorage('budgetTracker_cards', state.cards);
+  }, [state.cards]);
   
   // Action creators for easier usage
   const actions = {
@@ -318,7 +364,11 @@ export const AppProvider = ({ children }) => {
       return notification;
     },
     
-    removeNotification: (id) => dispatch({ type: ACTIONS.REMOVE_NOTIFICATION, payload: id })
+    removeNotification: (id) => dispatch({ type: ACTIONS.REMOVE_NOTIFICATION, payload: id }),
+    
+    // Card actions
+    setCards: (cards) => dispatch({ type: ACTIONS.SET_CARDS, payload: cards }),
+    updateCard: (idx, card) => dispatch({ type: ACTIONS.UPDATE_CARD, payload: { idx, card } })
   };
   
   // Calculated values (derived state)

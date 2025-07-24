@@ -10,17 +10,11 @@ import Analytics from './pages/Analytics';
 import Budget from './pages/Budget';
 import Goals from './pages/Goals';
 import Settings from './pages/Settings';
+import HalalPractices from './pages/HalalPractices';
+import ZakatCalculator from './pages/ZakatCalculator';  
+import Help from './pages/Help';
 
-// Import global styles
-import './App.css';
-
-/**
- * App Router Component
- * Demonstrates:
- * - React Router setup with multiple routes
- * - Simplified routing without authentication
- * - Clean app structure
- */
+ 
 const AppRouter = () => {
   return (
     <Router>
@@ -33,7 +27,9 @@ const AppRouter = () => {
           <Route path="/budget" element={<Budget />} />
           <Route path="/goals" element={<Goals />} />
           <Route path="/settings" element={<Settings />} />
-          
+          <Route path="/halal-guide" element={<HalalPractices />} />
+          <Route path="/zakat-calculator" element={<ZakatCalculator />} />
+          <Route path="/help" element={<Help />} />
           {/* Default redirect to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
@@ -47,14 +43,7 @@ const AppRouter = () => {
     </Router>
   );
 };
-
-/**
- * Main App Component
- * Demonstrates:
- * - Context Provider pattern
- * - Component composition
- * - Simplified app structure
- */
+ 
 function App() {
   return (
     <AppProvider>
