@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FiPlus, FiTarget, FiTrendingUp, FiCalendar, FiDollarSign, FiEdit3, FiTrash2, FiCheck, FiCheckCircle, FiXCircle, FiCopy } from 'react-icons/fi';
 import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
 import Tooltip from '../components/Tooltip';
+import Swal from 'sweetalert2';
 
 const GoalsContainer = styled.div`
   display: flex;
@@ -433,7 +434,6 @@ const Goals = () => {
   const { state, actions } = useAppContext();
   const [showModal, setShowModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
-  const searchInputRef = useRef();
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -624,10 +624,22 @@ const Goals = () => {
 
   // Handle delete goal
   const handleDelete = (goalId) => {
-    if (window.confirm('Are you sure you want to delete this goal?')) {
-      actions.deleteGoal(goalId);
-      actions.addNotification('Goal deleted successfully!', 'success');
-    }
+    Swal.fire({
+      title: 'Delete Goal?',
+      text: 'Are you sure you want to delete this goal? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      background: 'var(--bg-card)',
+      color: 'var(--text-primary)',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        actions.deleteGoal(goalId);
+        actions.addNotification('Goal deleted successfully!', 'success');
+      }
+    });
   };
 
   // Handle mark as complete
@@ -701,12 +713,20 @@ const Goals = () => {
         {/* Actions Bar */}
         <ActionsBar>
           <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Your Goals</h2>
-          <Tooltip content="Add new goal (Shortcut: N)" position="bottom">
-            <ActionButton onClick={() => setShowModal(true)} aria-label="Add new goal">
-              <FiPlus /> Add Goal
-            </ActionButton>
-          </Tooltip>
+          <div className="desktop-action-btn-row">
+            <Tooltip content="Add new goal (Shortcut: N)" position="bottom">
+              <ActionButton onClick={() => setShowModal(true)} aria-label="Add new goal">
+                <FiPlus /> Add Goal
+              </ActionButton>
+            </Tooltip>
+          </div>
         </ActionsBar>
+        {/* Sticky Add Goal Button for Mobile */}
+        <div className="sticky-action-btn">
+          <ActionButton onClick={() => setShowModal(true)} aria-label="Add new goal">
+            <FiPlus /> Add Goal
+          </ActionButton>
+        </div>
 
         {/* Goals Grid */}
         <GoalsGrid>

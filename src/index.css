@@ -381,6 +381,195 @@ tr:last-child td {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* --- Microinteractions & Feedback Enhancements --- */
+
+/* BUTTONS */
+button, .ripple-btn {
+  position: relative;
+  overflow: hidden;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+button:active::after, .ripple-btn:active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 120%;
+  background: var(--accent-primary-light);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.25;
+  pointer-events: none;
+  animation: ripple-fade 0.35s linear;
+}
+@keyframes ripple-fade {
+  from { opacity: 0.25; }
+  to { opacity: 0; }
+}
+button:hover, .ripple-btn:hover {
+  box-shadow: 0 2px 12px 0 var(--accent-primary-light);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* CARDS */
+.card, .StatCard, .OverviewCard, .GoalCard, .BudgetItem, .ChartCard {
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+.card:hover, .StatCard:hover, .OverviewCard:hover, .GoalCard:hover, .BudgetItem:hover, .ChartCard:hover {
+  box-shadow: 0 8px 32px 0 var(--accent-primary-light), 0 2px 8px 0 var(--primary);
+  transform: translateY(-3px) scale(1.015);
+  background: rgba(255,255,255,0.22);
+}
+
+/* PROGRESS BARS */
+.ProgressFill, .GoalBarFill, .progress-bar-fill {
+  transition: width 0.4s var(--transition-fast), background 0.3s;
+  box-shadow: 0 0 6px 0 var(--accent-primary-light);
+}
+
+/* PAGE TRANSITIONS (for framer-motion or .animate-fade-in) */
+.animate-fade-in, .page-transition {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Utility for glassy effect */
+.glass {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+}
+
+/* End microinteraction enhancements */
+
+/* --- Visual Hierarchy & Depth Enhancements --- */
+
+/* Glassmorphism for cards, modals, overlays */
+.card, .StatCard, .OverviewCard, .GoalCard, .BudgetItem, .ChartCard, .modal-overlay, .Modal, .EditCardModal, .sticky-action-btn {
+  background: linear-gradient(135deg, rgba(255,255,255,0.22) 60%, var(--bg-card) 100%);
+  backdrop-filter: blur(18px) saturate(200%);
+  -webkit-backdrop-filter: blur(18px) saturate(200%);
+  border: 1.5px solid rgba(255,255,255,0.22);
+}
+
+/* Multi-layered soft shadows for depth */
+.card, .StatCard, .OverviewCard, .GoalCard, .BudgetItem, .ChartCard, .Modal, .EditCardModal, .sticky-action-btn {
+  box-shadow:
+    0 2px 8px 0 rgba(80, 80, 180, 0.08),
+    0 8px 32px 0 rgba(31, 38, 135, 0.12),
+    0 1.5px 6px 0 rgba(80, 80, 180, 0.10);
+}
+
+/* Gradient section dividers and highlights */
+.section-divider {
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary));
+  border-radius: 2px;
+  margin: var(--space-xl) 0;
+  opacity: 0.7;
+}
+
+/* Section separation for dashboard, analytics, etc. */
+.section, .Section, .modal-overlay, .Modal, .EditCardModal {
+  margin-bottom: var(--space-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 2px 8px 0 rgba(80, 80, 180, 0.08),
+    0 8px 32px 0 rgba(31, 38, 135, 0.12);
+}
+
+/* Consistent depth for sticky bars and overlays */
+.sticky-action-btn, .modal-overlay {
+  box-shadow: 0 -2px 16px 0 var(--accent-primary-light), 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+}
+
+/* Gradient accent for sticky bar */
+.sticky-action-btn {
+  background: linear-gradient(90deg, var(--bg-card) 80%, var(--accent-primary-light) 100%);
+}
+
+/* Gradient accent for modals */
+.Modal, .EditCardModal {
+  background: linear-gradient(135deg, rgba(255,255,255,0.28) 60%, var(--bg-card) 100%);
+}
+
+/* End visual hierarchy & depth enhancements */
+
+/* --- Mobile Experience Enhancements --- */
+
+/* Sticky Action Button (for Add/Quick Add) */
+.sticky-action-btn {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  width: 100vw;
+  max-width: 100vw;
+  background: var(--bg-card);
+  box-shadow: 0 -2px 16px 0 var(--accent-primary-light);
+  padding: var(--space-lg) var(--space-xl);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px solid var(--border-primary);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+@media (min-width: 769px) {
+  .sticky-action-btn { display: none; }
+}
+
+/* Desktop action button row: visible on desktop, hidden on mobile */
+.desktop-action-btn-row { display: flex; }
+@media (max-width: 768px) {
+  .desktop-action-btn-row { display: none !important; }
+}
+
+/* Responsive Table: Collapse to Cards on Mobile */
+@media (max-width: 768px) {
+  .responsive-table, .TransactionsTable, .BudgetList, .GoalsGrid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--space-lg) !important;
+  }
+  .responsive-table thead, .responsive-table tr, .responsive-table th, .responsive-table td {
+    display: block !important;
+    width: 100% !important;
+    text-align: left !important;
+    border: none !important;
+    padding: var(--space-md) !important;
+  }
+  .responsive-table tr {
+    margin-bottom: var(--space-lg) !important;
+    background: var(--bg-card) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+}
+
+/* Sidebar Overlay for Mobile */
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--overlay-bg-strong);
+    z-index: 999;
+    transition: opacity var(--transition-fast);
+  }
+}
+
+/* Touch Feedback for All Interactive Elements */
+button, .ripple-btn, .ActionButton, .IconButton {
+  -webkit-tap-highlight-color: var(--accent-primary-light);
+  touch-action: manipulation;
+}
+
+/* End mobile experience enhancements */
+
 /* Print Styles */
 @media print {
   * {

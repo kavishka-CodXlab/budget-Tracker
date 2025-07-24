@@ -6,6 +6,7 @@ import useForm from '../hooks/useForm'
 import useDebounce from '../hooks/useDebounce'
 import Tooltip from '../components/Tooltip'
 import { FiFilter, FiSearch, FiDownload, FiPlus, FiEdit3, FiTrash2, FiCalendar, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCreditCard, FiCheckCircle, FiXCircle, FiCopy } from 'react-icons/fi'
+import Swal from 'sweetalert2';
 
 const TransactionsContainer = styled.div`
   display: flex;
@@ -631,10 +632,22 @@ const Transactions = () => {
 
   // Handle delete transaction
   const handleDelete = (transactionId) => {
-    if (window.confirm('Are you sure you want to delete this transaction?')) {
-      actions.deleteTransaction(transactionId);
-      actions.addNotification('Transaction deleted successfully!', 'success');
-    }
+    Swal.fire({
+      title: 'Delete Transaction?',
+      text: 'Are you sure you want to delete this transaction? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      background: 'var(--bg-card)',
+      color: 'var(--text-primary)',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        actions.deleteTransaction(transactionId);
+        actions.addNotification('Transaction deleted successfully!', 'success');
+      }
+    });
   };
 
   // Handle modal close
@@ -711,14 +724,21 @@ const Transactions = () => {
                 Export
               </ActionButton>
             </Tooltip>
-            <Tooltip content="Add new transaction (Shortcut: N)" position="bottom">
-              <ActionButton onClick={() => setShowModal(true)} aria-label="Add new transaction">
-                <FiPlus />
-                Add Transaction
-              </ActionButton>
-            </Tooltip>
+            <div className="desktop-action-btn-row">
+              <Tooltip content="Add new transaction (Shortcut: N)" position="bottom">
+                <ActionButton onClick={() => setShowModal(true)} aria-label="Add new transaction">
+                  <FiPlus /> Add Transaction
+                </ActionButton>
+              </Tooltip>
+            </div>
           </div>
         </HeaderSection>
+        {/* Sticky Add Transaction Button for Mobile */}
+        <div className="sticky-action-btn">
+          <ActionButton onClick={() => setShowModal(true)} aria-label="Add new transaction">
+            <FiPlus /> Add Transaction
+          </ActionButton>
+        </div>
 
         {/* Stats Cards */}
         <StatsCards>

@@ -20,6 +20,7 @@ import {
 import { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardContainer = styled(motion.div)`
   display: flex;
@@ -529,6 +530,7 @@ const containerVariants = {
 
 const Dashboard = () => {
   const { state, actions } = useAppContext();
+  const navigate = useNavigate();
 
   // --- Real-time Transactions Data ---
   const transactions = state.transactions || [];
@@ -672,7 +674,7 @@ const Dashboard = () => {
             <Section>
               <SectionHeader>
                 <SectionTitle>Recent Transactions</SectionTitle>
-                <ViewAllButton>View All</ViewAllButton>
+                <ViewAllButton onClick={() => navigate('/transactions')}>View All</ViewAllButton>
               </SectionHeader>
               <TableWrapper>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -700,14 +702,24 @@ const Dashboard = () => {
           </DashboardLeft>
           {/* Right: Wallet + Goals Progress */}
           <DashboardRight>
-            {/* Edit Card and Quick Add Buttons */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
-              <RippleButton onClick={() => { setShowEditCard(true); }} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
-                <FiEdit2 style={{ marginRight: 10 }} /> Edit Card
-              </RippleButton>
-              <RippleButton onClick={() => setShowQuickAdd(true)} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
-                <FiPlus style={{ marginRight: 10 }} /> Quick Add
-              </RippleButton>
+            {/* Edit Card and Quick Add Buttons - sticky on mobile, normal row on desktop */}
+            <div>
+              <div className="desktop-action-btn-row" style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
+                <RippleButton onClick={() => { setShowEditCard(true); }} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
+                  <FiEdit2 style={{ marginRight: 10 }} /> Edit Card
+                </RippleButton>
+                <RippleButton onClick={() => setShowQuickAdd(true)} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
+                  <FiPlus style={{ marginRight: 10 }} /> Quick Add
+                </RippleButton>
+              </div>
+              <div className="sticky-action-btn" style={{ gap: 16 }}>
+                <RippleButton onClick={() => { setShowEditCard(true); }} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
+                  <FiEdit2 style={{ marginRight: 10 }} /> Edit Card
+                </RippleButton>
+                <RippleButton onClick={() => setShowQuickAdd(true)} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '14px 28px', fontWeight: 700, fontSize: 17, cursor: 'pointer', boxShadow: '0 4px 24px 0 rgba(80,80,180,0.10)' }}>
+                  <FiPlus style={{ marginRight: 10 }} /> Quick Add
+                </RippleButton>
+              </div>
             </div>
 
             {/* Quick Add Modal */}

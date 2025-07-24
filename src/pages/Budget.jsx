@@ -5,6 +5,7 @@ import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import useForm from '../hooks/useForm';
 import Tooltip from '../components/Tooltip';
+import Swal from 'sweetalert2';
 
 const BudgetContainer = styled.div`
   display: flex;
@@ -503,10 +504,22 @@ const Budget = () => {
 
   // Handle delete budget
   const handleDelete = (budgetId) => {
-    if (window.confirm('Are you sure you want to delete this budget?')) {
-      actions.deleteBudget(budgetId);
-      actions.addNotification('Budget deleted successfully!', 'success');
-    }
+    Swal.fire({
+      title: 'Delete Budget?',
+      text: 'Are you sure you want to delete this budget? This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      background: 'var(--bg-card)',
+      color: 'var(--text-primary)',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        actions.deleteBudget(budgetId);
+        actions.addNotification('Budget deleted successfully!', 'success');
+      }
+    });
   };
 
   // Handle modal close
@@ -556,12 +569,20 @@ const Budget = () => {
         {/* Actions Bar */}
         <ActionsBar>
           <h2 style={{ color: 'var(--text-primary)', margin: 0 }}>Budget Categories</h2>
-          <Tooltip content="Add new budget (Shortcut: N)" position="bottom">
-            <ActionButton onClick={() => setShowModal(true)} aria-label="Add new budget">
-              <FiPlus /> Add Budget
-            </ActionButton>
-          </Tooltip>
+          <div className="desktop-action-btn-row">
+            <Tooltip content="Add new budget (Shortcut: N)" position="bottom">
+              <ActionButton onClick={() => setShowModal(true)} aria-label="Add new budget">
+                <FiPlus /> Add Budget
+              </ActionButton>
+            </Tooltip>
+          </div>
         </ActionsBar>
+        {/* Sticky Add Budget Button for Mobile */}
+        <div className="sticky-action-btn">
+          <ActionButton onClick={() => setShowModal(true)} aria-label="Add new budget">
+            <FiPlus /> Add Budget
+          </ActionButton>
+        </div>
 
         {/* Budget List */}
         <BudgetList>

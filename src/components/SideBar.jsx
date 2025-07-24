@@ -146,7 +146,7 @@ const NavigationLink = styled(NavLink)`
     color: #23232b;
   }
   &.active {
-    background: #eaff6b;
+    background: var(--primary);
     color: #23232b;
     font-weight: 700;
     box-shadow: 0 2px 8px 0 rgba(200,220,80,0.08);
@@ -234,21 +234,18 @@ const SideBar = ({ isOpen, onClose }) => {
   const handleLogout = (e) => {
     e.preventDefault();
     Swal.fire({
-      title: 'Are you sure you want to logout?',
-      text: 'All your local data will be cleared.',
+      title: 'Log out?',
+      text: 'Are you sure you want to log out? All your data will be cleared from this device.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#eaff6b',
-      cancelButtonColor: '#23232b',
-      confirmButtonText: 'Yes, logout',
-      cancelButtonText: 'Cancel',
-      background: '#23232b',
-      color: '#fff',
+      confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--primary') || '#81a163',
+      cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary') || '#9cc773',
+      confirmButtonText: 'Yes, log out',
+      background: 'var(--bg-card)',
+      color: 'var(--text-primary)',
       customClass: {
-        popup: 'swal2-custom',
-        confirmButton: 'swal2-confirm-custom',
-        cancelButton: 'swal2-cancel-custom'
-      }
+        popup: 'swal2-popup-custom',
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.clear();
