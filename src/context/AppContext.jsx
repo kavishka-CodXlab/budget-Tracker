@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { migrateCurrencySymbolToCode } from '../utils/currency';
 
 /* eslint-disable react-refresh/only-export-components */
 
@@ -9,7 +10,7 @@ const initialState = {
     name: 'Personal Budget',
     email: 'user@example.com',
     avatar: 'PB',
-    currency: '$'
+    currency: 'USD'
   },
   
   // Transactions data
@@ -51,11 +52,13 @@ export const ACTIONS = {
   ADD_BUDGET: 'ADD_BUDGET',
   UPDATE_BUDGET: 'UPDATE_BUDGET',
   DELETE_BUDGET: 'DELETE_BUDGET',
+  SET_BUDGETS: 'SET_BUDGETS',
   
   // Goal actions
   ADD_GOAL: 'ADD_GOAL',
   UPDATE_GOAL: 'UPDATE_GOAL',
   DELETE_GOAL: 'DELETE_GOAL',
+  SET_GOALS: 'SET_GOALS',
   
   // UI actions
   TOGGLE_SIDEBAR: 'TOGGLE_SIDEBAR',
@@ -63,6 +66,9 @@ export const ACTIONS = {
   SET_LOADING: 'SET_LOADING',
   ADD_NOTIFICATION: 'ADD_NOTIFICATION',
   REMOVE_NOTIFICATION: 'REMOVE_NOTIFICATION',
+  
+  // Category actions
+  SET_CATEGORIES: 'SET_CATEGORIES',
   
   // Card actions
   SET_CARDS: 'SET_CARDS',
@@ -126,6 +132,12 @@ const appReducer = (state, action) => {
         budgets: state.budgets.filter(budget => budget.id !== action.payload)
       };
       
+    case ACTIONS.SET_BUDGETS:
+      return {
+        ...state,
+        budgets: action.payload
+      };
+      
     case ACTIONS.ADD_GOAL:
       return {
         ...state,
@@ -144,6 +156,12 @@ const appReducer = (state, action) => {
       return {
         ...state,
         goals: state.goals.filter(goal => goal.id !== action.payload)
+      };
+      
+    case ACTIONS.SET_GOALS:
+      return {
+        ...state,
+        goals: action.payload
       };
       
     case ACTIONS.TOGGLE_SIDEBAR:
@@ -180,6 +198,12 @@ const appReducer = (state, action) => {
           ...state.ui,
           notifications: state.ui.notifications.filter(notification => notification.id !== action.payload)
         }
+      };
+      
+    case ACTIONS.SET_CATEGORIES:
+      return {
+        ...state,
+        categories: action.payload
       };
       
     case ACTIONS.SET_CARDS:
@@ -255,10 +279,17 @@ export const AppProvider = ({ children }) => {
     { id: 'g1', title: 'Umrah Savings', description: 'Save for Umrah trip', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-01', createdAt: '2024-06-01' },
     { id: 'g2', title: 'Emergency Fund', description: 'Halal emergency fund', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', createdAt: '2024-06-01' }
   ];
-  // Load initial state from localStorage
+  // Load initial state from localStorage with currency migration
+  const loadedUser = loadFromLocalStorage('budgetTracker_user', initialState.user);
+  
+  // Migrate old currency symbols to currency codes
+  if (loadedUser.currency && loadedUser.currency.length <= 2) {
+    loadedUser.currency = migrateCurrencySymbolToCode(loadedUser.currency);
+  }
+  
   const loadedState = {
     ...initialState,
-    user: loadFromLocalStorage('budgetTracker_user', initialState.user),
+    user: loadedUser,
     transactions: shouldSeed ? halalSampleTransactions : loadFromLocalStorage('budgetTracker_transactions', initialState.transactions),
     budgets: loadFromLocalStorage('budgetTracker_budgets', initialState.budgets),
     goals: shouldSeed ? halalSampleGoals : loadFromLocalStorage('budgetTracker_goals', initialState.goals),
@@ -297,6 +328,7 @@ export const AppProvider = ({ children }) => {
   const actions = {
     // User actions
     updateUser: (userData) => dispatch({ type: ACTIONS.UPDATE_USER, payload: userData }),
+    updateUserProfile: (userData) => dispatch({ type: ACTIONS.UPDATE_USER, payload: userData }),
     
     // Transaction actions
     addTransaction: (transaction) => {
@@ -368,7 +400,24 @@ export const AppProvider = ({ children }) => {
     
     // Card actions
     setCards: (cards) => dispatch({ type: ACTIONS.SET_CARDS, payload: cards }),
-    updateCard: (idx, card) => dispatch({ type: ACTIONS.UPDATE_CARD, payload: { idx, card } })
+    updateCard: (idx, card) => dispatch({ type: ACTIONS.UPDATE_CARD, payload: { idx, card } }),
+    
+    // Data management actions
+    importData: (data) => {
+      if (data.transactions) dispatch({ type: ACTIONS.SET_TRANSACTIONS, payload: data.transactions });
+      if (data.budgets) dispatch({ type: ACTIONS.SET_BUDGETS, payload: data.budgets });
+      if (data.goals) dispatch({ type: ACTIONS.SET_GOALS, payload: data.goals });
+      if (data.categories) dispatch({ type: ACTIONS.SET_CATEGORIES, payload: data.categories });
+      if (data.user) dispatch({ type: ACTIONS.UPDATE_USER, payload: data.user });
+    },
+    
+    clearAllData: () => {
+      dispatch({ type: ACTIONS.SET_TRANSACTIONS, payload: [] });
+      dispatch({ type: ACTIONS.SET_BUDGETS, payload: [] });
+      dispatch({ type: ACTIONS.SET_GOALS, payload: [] });
+      dispatch({ type: ACTIONS.SET_CATEGORIES, payload: initialState.categories });
+      dispatch({ type: ACTIONS.UPDATE_USER, payload: initialState.user });
+    }
   };
   
   // Calculated values (derived state)
@@ -423,4 +472,4 @@ export const AppProvider = ({ children }) => {
   );
 };
 
-export default AppContext; 
+export default AppContext;

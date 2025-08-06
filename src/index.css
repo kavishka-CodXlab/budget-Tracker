@@ -12,9 +12,9 @@
   /* Light Theme Colors */
   --text: #0a0a09;
   --background: #fafbfa;
-  --primary: #81a163;
-  --secondary: #bbd2a4;
-  --accent: #9cc773;
+  --primary: #4a90e2;
+  --secondary: #7bb3f0;
+  --accent: #5ba0f5;
   
   /* Mapped Variables for Components */
   --bg-primary: var(--background);
@@ -28,19 +28,19 @@
   --text-tertiary: #7a8a7a;
   --text-inverse: #ffffff;
   
-  --border-primary: #d6e3d6;
-  --border-secondary: #c0d0c0;
-  --border-tertiary: #e0e8e0;
+  --border-primary: #d6e3f0;
+  --border-secondary: #c0d0e8;
+  --border-tertiary: #e0e8f8;
   
   --accent-primary: var(--accent);
-  --accent-primary-hover: #87b85f;
-  --accent-primary-light: #e8f4e8;
-  --accent-primary-dark: #6b8f4f;
+  --accent-primary-hover: #4a7bd1;
+  --accent-primary-light: #e8f2ff;
+  --accent-primary-dark: #3a7bc8;
   
-  /* Status Colors with Green Theme */
+  /* Status Colors with Blue Theme */
   --success: var(--primary);
-  --success-light: #f0f8f0;
-  --success-dark: #6b8f4f;
+  --success-light: #f0f8ff;
+  --success-dark: #3a7bc8;
   --warning: #d4a574;
   --warning-light: #f8f2e8;
   --warning-dark: #b8915f;
@@ -83,36 +83,36 @@
 /* Dark Theme Colors */
 [data-theme="dark"] {
   --text: #f5f5f4;
-  --background: #0a0f0a;
-  --primary: #7c9c5e;
-  --secondary: #455c2d;
-  --accent: #608b37;
+  --background: #0a0f1a;
+  --primary: #4a7bc8;
+  --secondary: #2d4a7c;
+  --accent: #3a7bc8;
   
   /* Mapped Variables for Components */
   --bg-primary: var(--background);
-  --bg-secondary: #121812;
-  --bg-tertiary: #1a221a;
-  --bg-card: #151b15;
-  --bg-sidebar: #0f140f;
+  --bg-secondary: #121820;
+  --bg-tertiary: #1a2230;
+  --bg-card: #151b25;
+  --bg-sidebar: #0f141a;
   
   --text-primary: var(--text);
-  --text-secondary: #a8b5a8;
-  --text-tertiary: #8a9a8a;
-  --text-inverse: #0a0f0a;
+  --text-secondary: #a8b5c8;
+  --text-tertiary: #8a9ab0;
+  --text-inverse: #0a0f1a;
   
-  --border-primary: #2a352a;
-  --border-secondary: #354535;
-  --border-tertiary: #455545;
+  --border-primary: #2a3540;
+  --border-secondary: #354550;
+  --border-tertiary: #455560;
   
   --accent-primary: var(--accent);
-  --accent-primary-hover: #6fa03f;
-  --accent-primary-light: #1a3010;
-  --accent-primary-dark: #4f7328;
+  --accent-primary-hover: #5a8bd8;
+  --accent-primary-light: #1a2a40;
+  --accent-primary-dark: #3a5a88;
   
-  /* Status Colors with Dark Green Theme */
+  /* Status Colors with Dark Blue Theme */
   --success: var(--primary);
-  --success-light: #1f2b1f;
-  --success-dark: #6b8f4f;
+  --success-light: #1f2b40;
+  --success-dark: #3a5a88;
   --warning: #b8915f;
   --warning-light: #2b1f0f;
   --warning-dark: #d4a574;
@@ -124,12 +124,12 @@
   --info-dark: #7a9cc7;
   
   /* Dark Overlay Colors */
-  --overlay-bg: rgba(10, 15, 10, 0.5);
-  --overlay-bg-strong: rgba(10, 15, 10, 0.7);
+  --overlay-bg: rgba(10, 15, 26, 0.5);
+  --overlay-bg-strong: rgba(10, 15, 26, 0.7);
   
-  --shadow-sm: 0 1px 2px 0 rgb(10 15 10 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(10 15 10 / 0.2), 0 2px 4px -2px rgb(10 15 10 / 0.2);
-  --shadow-lg: 0 10px 15px -3px rgb(10 15 10 / 0.15), 0 4px 6px -4px rgb(10 15 10 / 0.15);
+  --shadow-sm: 0 1px 2px 0 rgb(10 15 26 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(10 15 26 / 0.2), 0 2px 4px -2px rgb(10 15 26 / 0.2);
+  --shadow-lg: 0 10px 15px -3px rgb(10 15 26 / 0.15), 0 4px 6px -4px rgb(10 15 26 / 0.15);
 }
 
 /* Base Styles */
@@ -334,6 +334,84 @@ tr:last-child td {
   }
 }
 
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+  }
+}
+
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -370,15 +448,37 @@ tr:last-child td {
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft 0.3s ease-out;
+  animation: slideInFromLeft 0.3s ease-out;
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.3s ease-out;
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s ease-out;
 }
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 /* --- Microinteractions & Feedback Enhancements --- */

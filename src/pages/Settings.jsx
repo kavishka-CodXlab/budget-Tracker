@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FiUser, FiCreditCard, FiSave, FiMoon, FiSun, FiDownload, FiUpload, FiBell, FiLock, FiDatabase } from 'react-icons/fi';
+import { FiUser, FiCreditCard, FiSave, FiMoon, FiSun, FiDownload, FiUpload, FiBell, FiLock, FiDatabase, FiLogIn, FiLogOut, FiShield, FiKey } from 'react-icons/fi';
 import Layout from '../layouts/Layout';
 import { useAppContext } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import useForm from '../hooks/useForm';
+import { getCurrencyOptions } from '../utils/currency';
+import Swal from 'sweetalert2';
 
 const SettingsContainer = styled.div`
   display: flex;
@@ -268,15 +270,132 @@ const ErrorText = styled.div`
   margin-top: var(--space-xs);
 `;
 
+const AuthSection = styled.div`
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-2xl);
+`;
+
+const AuthStatus = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  background-color: ${props => props.isLoggedIn ? 'var(--success-light)' : 'var(--warning-light)'};
+  border: 1px solid ${props => props.isLoggedIn ? 'var(--success)' : 'var(--warning)'};
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+`;
+
+const AuthStatusText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: ${props => props.isLoggedIn ? 'var(--success-dark)' : 'var(--warning-dark)'};
+  font-weight: 500;
+`;
+
+const AuthButton = styled.button`
+  background-color: ${props => props.primary ? 'var(--accent-primary)' : 'var(--bg-tertiary)'};
+  color: ${props => props.primary ? 'var(--text-inverse)' : 'var(--text-primary)'};
+  border: 1px solid ${props => props.primary ? 'var(--accent-primary)' : 'var(--border-primary)'};
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  
+  &:hover {
+    background-color: ${props => props.primary ? 'var(--accent-primary-hover)' : 'var(--bg-secondary)'};
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+`;
+
+const SecuritySection = styled.div`
+  border-top: 1px solid var(--border-primary);
+  padding-top: var(--space-xl);
+  margin-top: var(--space-xl);
+`;
+
+const PasswordForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+`;
+
 const Settings = () => {
   const { state, actions } = useAppContext();
   const { theme, toggleTheme } = useTheme();
+  const [isLoggedIn, setIsLoggedIn] = useState(!!state.user?.email && state.user?.email !== 'user@example.com');
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [notifications, setNotifications] = useState({
     transactionAlerts: true,
     budgetWarnings: true,
     goalReminders: false,
     weeklyReports: true
   });
+
+  // Login form validation
+  const loginValidationRules = {
+    email: {
+      required: { message: 'Email is required' },
+      email: { message: 'Please enter a valid email address' }
+    },
+    password: {
+      required: { message: 'Password is required' },
+      minLength: { value: 6, message: 'Password must be at least 6 characters' }
+    }
+  };
+
+  // Register form validation
+  const registerValidationRules = {
+    name: {
+      required: { message: 'Name is required' },
+      minLength: { value: 2, message: 'Name must be at least 2 characters' }
+    },
+    email: {
+      required: { message: 'Email is required' },
+      email: { message: 'Please enter a valid email address' }
+    },
+    password: {
+      required: { message: 'Password is required' },
+      minLength: { value: 6, message: 'Password must be at least 6 characters' }
+    },
+    confirmPassword: {
+      required: { message: 'Please confirm your password' },
+      custom: {
+        validator: (value, values) => value === values.password,
+        message: 'Passwords do not match'
+      }
+    }
+  };
+
+  // Password change validation
+  const passwordValidationRules = {
+    currentPassword: {
+      required: { message: 'Current password is required' }
+    },
+    newPassword: {
+      required: { message: 'New password is required' },
+      minLength: { value: 6, message: 'Password must be at least 6 characters' }
+    },
+    confirmNewPassword: {
+      required: { message: 'Please confirm your new password' },
+      custom: {
+        validator: (value, values) => value === values.newPassword,
+        message: 'Passwords do not match'
+      }
+    }
+  };
 
   // Profile form validation
   const profileValidationRules = {
@@ -289,6 +408,63 @@ const Settings = () => {
       email: { message: 'Please enter a valid email address' }
     }
   };
+
+  // Login form
+  const {
+    values: loginValues,
+    errors: loginErrors,
+    touched: loginTouched,
+    isSubmitting: loginSubmitting,
+    handleChange: handleLoginChange,
+    handleBlur: handleLoginBlur,
+    handleSubmit: handleLoginSubmit,
+    resetForm: resetLoginForm
+  } = useForm(
+    {
+      email: '',
+      password: ''
+    },
+    loginValidationRules
+  );
+
+  // Register form
+  const {
+    values: registerValues,
+    errors: registerErrors,
+    touched: registerTouched,
+    isSubmitting: registerSubmitting,
+    handleChange: handleRegisterChange,
+    handleBlur: handleRegisterBlur,
+    handleSubmit: handleRegisterSubmit,
+    resetForm: resetRegisterForm
+  } = useForm(
+    {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    },
+    registerValidationRules
+  );
+
+  // Password change form
+  const {
+    values: passwordValues,
+    errors: passwordErrors,
+    touched: passwordTouched,
+    isSubmitting: passwordSubmitting,
+    handleChange: handlePasswordChange,
+    handleBlur: handlePasswordBlur,
+    handleSubmit: handlePasswordSubmit,
+    resetForm: resetPasswordForm
+  } = useForm(
+    {
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
+    },
+    passwordValidationRules
+  );
 
   // Profile form
   const {
@@ -310,15 +486,8 @@ const Settings = () => {
     profileValidationRules
   );
 
-  // Currency options
-  const currencies = [
-    { value: 'USD', label: 'US Dollar ($)' },
-    { value: 'EUR', label: 'Euro (€)' },
-    { value: 'GBP', label: 'British Pound (£)' },
-    { value: 'JPY', label: 'Japanese Yen (¥)' },
-    { value: 'CAD', label: 'Canadian Dollar (C$)' },
-    { value: 'AUD', label: 'Australian Dollar (A$)' }
-  ];
+  // Currency options from utility
+  const currencies = getCurrencyOptions();
 
   // Timezone options (simplified list)
   const timezones = [
@@ -333,7 +502,97 @@ const Settings = () => {
     { value: 'Australia/Sydney', label: 'Sydney' }
   ];
 
+  // Handle login
+  const onLoginSubmit = async (formData) => {
+    try {
+      // Simulate login - in a real app, this would call an API
+      const userData = {
+        name: formData.email.split('@')[0], // Use email prefix as name
+        email: formData.email,
+        currency: 'USD',
+        timezone: 'UTC',
+        language: 'en',
+        isAuthenticated: true
+      };
+      
+      actions.updateUser(userData);
+      setIsLoggedIn(true);
+      setShowLoginForm(false);
+      resetLoginForm();
+      actions.addNotification('Successfully logged in!', 'success');
+    } catch (error) {
+      console.error('Login error:', error);
+      actions.addNotification('Login failed. Please try again.', 'error');
+    }
+  };
 
+  // Handle register
+  const onRegisterSubmit = async (formData) => {
+    try {
+      // Simulate registration - in a real app, this would call an API
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        currency: 'USD',
+        timezone: 'UTC',
+        language: 'en',
+        isAuthenticated: true
+      };
+      
+      actions.updateUser(userData);
+      setIsLoggedIn(true);
+      setShowRegisterForm(false);
+      resetRegisterForm();
+      actions.addNotification('Account created successfully!', 'success');
+    } catch (error) {
+      console.error('Registration error:', error);
+      actions.addNotification('Registration failed. Please try again.', 'error');
+    }
+  };
+
+  // Handle password change
+  const onPasswordSubmit = async (formData) => {
+    try {
+      // Simulate password change - in a real app, this would call an API
+      actions.addNotification('Password changed successfully!', 'success');
+      setShowPasswordForm(false);
+      resetPasswordForm();
+    } catch (error) {
+      console.error('Password change error:', error);
+      actions.addNotification('Password change failed. Please try again.', 'error');
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Log out?',
+      text: 'Are you sure you want to log out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--primary') || '#81a163',
+      cancelButtonColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-primary') || '#9cc773',
+      confirmButtonText: 'Yes, log out',
+      background: 'var(--bg-card)',
+      color: 'var(--text-primary)',
+      customClass: {
+        popup: 'swal2-popup-custom',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const defaultUser = {
+          name: 'Personal Budget',
+          email: 'user@example.com',
+          avatar: 'PB',
+          currency: '$',
+          isAuthenticated: false
+        };
+        actions.updateUser(defaultUser);
+        setIsLoggedIn(false);
+        actions.addNotification('Logged out successfully!', 'info');
+      }
+    });
+  };
 
   // Handle profile form submission
   const onProfileSubmit = async (formData) => {
@@ -358,6 +617,7 @@ const Settings = () => {
   const handleExportData = () => {
     try {
       const exportData = {
+        user: state.user,
         transactions: state.transactions,
         budgets: state.budgets,
         goals: state.goals,
@@ -420,6 +680,255 @@ const Settings = () => {
   return (
     <Layout title="Settings">
       <SettingsContainer>
+        {/* Authentication Section */}
+        <AuthSection>
+          <SectionHeader>
+            <SectionIcon>
+              <FiShield />
+            </SectionIcon>
+            <SectionTitle>Account & Security</SectionTitle>
+          </SectionHeader>
+
+          <AuthStatus isLoggedIn={isLoggedIn}>
+            <AuthStatusText isLoggedIn={isLoggedIn}>
+              <FiUser />
+              {isLoggedIn ? `Logged in as ${state.user?.name}` : 'Not logged in'}
+            </AuthStatusText>
+            {isLoggedIn ? (
+              <AuthButton onClick={handleLogout}>
+                <FiLogOut />
+                Logout
+              </AuthButton>
+            ) : (
+              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                <AuthButton onClick={() => setShowLoginForm(true)}>
+                  <FiLogIn />
+                  Login
+                </AuthButton>
+                <AuthButton primary onClick={() => setShowRegisterForm(true)}>
+                  <FiUser />
+                  Register
+                </AuthButton>
+              </div>
+            )}
+          </AuthStatus>
+
+          {/* Login Form */}
+          {showLoginForm && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleLoginSubmit(onLoginSubmit);
+            }}>
+              <FormGrid>
+                <FormGroup>
+                  <Label htmlFor="login-email">Email Address</Label>
+                  <Input
+                    type="email"
+                    id="login-email"
+                    placeholder="Enter your email"
+                    value={loginValues.email}
+                    onChange={(e) => handleLoginChange('email', e.target.value)}
+                    onBlur={() => handleLoginBlur('email')}
+                  />
+                  {loginTouched.email && loginErrors.email && (
+                    <ErrorText>{loginErrors.email}</ErrorText>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label htmlFor="login-password">Password</Label>
+                  <Input
+                    type="password"
+                    id="login-password"
+                    placeholder="Enter your password"
+                    value={loginValues.password}
+                    onChange={(e) => handleLoginChange('password', e.target.value)}
+                    onBlur={() => handleLoginBlur('password')}
+                  />
+                  {loginTouched.password && loginErrors.password && (
+                    <ErrorText>{loginErrors.password}</ErrorText>
+                  )}
+                </FormGroup>
+              </FormGrid>
+
+              <ButtonGrid>
+                <Button primary type="submit" disabled={loginSubmitting}>
+                  <FiLogIn />
+                  {loginSubmitting ? 'Logging in...' : 'Login'}
+                </Button>
+                <Button onClick={() => {
+                  setShowLoginForm(false);
+                  resetLoginForm();
+                }}>
+                  Cancel
+                </Button>
+              </ButtonGrid>
+            </form>
+          )}
+
+          {/* Register Form */}
+          {showRegisterForm && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleRegisterSubmit(onRegisterSubmit);
+            }}>
+              <FormGrid>
+                <FormGroup>
+                  <Label htmlFor="register-name">Full Name</Label>
+                  <Input
+                    type="text"
+                    id="register-name"
+                    placeholder="Enter your full name"
+                    value={registerValues.name}
+                    onChange={(e) => handleRegisterChange('name', e.target.value)}
+                    onBlur={() => handleRegisterBlur('name')}
+                  />
+                  {registerTouched.name && registerErrors.name && (
+                    <ErrorText>{registerErrors.name}</ErrorText>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label htmlFor="register-email">Email Address</Label>
+                  <Input
+                    type="email"
+                    id="register-email"
+                    placeholder="Enter your email"
+                    value={registerValues.email}
+                    onChange={(e) => handleRegisterChange('email', e.target.value)}
+                    onBlur={() => handleRegisterBlur('email')}
+                  />
+                  {registerTouched.email && registerErrors.email && (
+                    <ErrorText>{registerErrors.email}</ErrorText>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label htmlFor="register-password">Password</Label>
+                  <Input
+                    type="password"
+                    id="register-password"
+                    placeholder="Enter your password"
+                    value={registerValues.password}
+                    onChange={(e) => handleRegisterChange('password', e.target.value)}
+                    onBlur={() => handleRegisterBlur('password')}
+                  />
+                  {registerTouched.password && registerErrors.password && (
+                    <ErrorText>{registerErrors.password}</ErrorText>
+                  )}
+                </FormGroup>
+
+                <FormGroup>
+                  <Label htmlFor="register-confirm-password">Confirm Password</Label>
+                  <Input
+                    type="password"
+                    id="register-confirm-password"
+                    placeholder="Confirm your password"
+                    value={registerValues.confirmPassword}
+                    onChange={(e) => handleRegisterChange('confirmPassword', e.target.value)}
+                    onBlur={() => handleRegisterBlur('confirmPassword')}
+                  />
+                  {registerTouched.confirmPassword && registerErrors.confirmPassword && (
+                    <ErrorText>{registerErrors.confirmPassword}</ErrorText>
+                  )}
+                </FormGroup>
+              </FormGrid>
+
+              <ButtonGrid>
+                <Button primary type="submit" disabled={registerSubmitting}>
+                  <FiUser />
+                  {registerSubmitting ? 'Creating Account...' : 'Create Account'}
+                </Button>
+                <Button onClick={() => {
+                  setShowRegisterForm(false);
+                  resetRegisterForm();
+                }}>
+                  Cancel
+                </Button>
+              </ButtonGrid>
+            </form>
+          )}
+
+          {/* Security Section */}
+          {isLoggedIn && (
+            <SecuritySection>
+              <AdvancedTitle>Security</AdvancedTitle>
+              
+              {!showPasswordForm ? (
+                <Button onClick={() => setShowPasswordForm(true)}>
+                  <FiKey />
+                  Change Password
+                </Button>
+              ) : (
+                <PasswordForm onSubmit={(e) => {
+                  e.preventDefault();
+                  handlePasswordSubmit(onPasswordSubmit);
+                }}>
+                  <FormGrid>
+                    <FormGroup>
+                      <Label htmlFor="current-password">Current Password</Label>
+                      <Input
+                        type="password"
+                        id="current-password"
+                        placeholder="Enter current password"
+                        value={passwordValues.currentPassword}
+                        onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                        onBlur={() => handlePasswordBlur('currentPassword')}
+                      />
+                      {passwordTouched.currentPassword && passwordErrors.currentPassword && (
+                        <ErrorText>{passwordErrors.currentPassword}</ErrorText>
+                      )}
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input
+                        type="password"
+                        id="new-password"
+                        placeholder="Enter new password"
+                        value={passwordValues.newPassword}
+                        onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                        onBlur={() => handlePasswordBlur('newPassword')}
+                      />
+                      {passwordTouched.newPassword && passwordErrors.newPassword && (
+                        <ErrorText>{passwordErrors.newPassword}</ErrorText>
+                      )}
+                    </FormGroup>
+
+                    <FormGroup>
+                      <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                      <Input
+                        type="password"
+                        id="confirm-new-password"
+                        placeholder="Confirm new password"
+                        value={passwordValues.confirmNewPassword}
+                        onChange={(e) => handlePasswordChange('confirmNewPassword', e.target.value)}
+                        onBlur={() => handlePasswordBlur('confirmNewPassword')}
+                      />
+                      {passwordTouched.confirmNewPassword && passwordErrors.confirmNewPassword && (
+                        <ErrorText>{passwordErrors.confirmNewPassword}</ErrorText>
+                      )}
+                    </FormGroup>
+                  </FormGrid>
+
+                  <ButtonGrid>
+                    <Button primary type="submit" disabled={passwordSubmitting}>
+                      <FiKey />
+                      {passwordSubmitting ? 'Changing Password...' : 'Change Password'}
+                    </Button>
+                    <Button onClick={() => {
+                      setShowPasswordForm(false);
+                      resetPasswordForm();
+                    }}>
+                      Cancel
+                    </Button>
+                  </ButtonGrid>
+                </PasswordForm>
+              )}
+            </SecuritySection>
+          )}
+        </AuthSection>
+
         {/* Profile Settings */}
         <SettingsSection>
           <SectionHeader>
@@ -665,4 +1174,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;

@@ -28,6 +28,108 @@ const DashboardContainer = styled(motion.div)`
   gap: var(--space-2xl);
 `;
 
+const WelcomeSection = styled(motion.div)`
+  background: linear-gradient(135deg, var(--accent-primary-light), var(--primary-light));
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  margin-bottom: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--primary));
+    opacity: 0.8;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60%;
+    height: 30%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    border-radius: 50%;
+    filter: blur(8px);
+    pointer-events: none;
+    opacity: 0.6;
+    z-index: 1;
+  }
+`;
+
+const WelcomeContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: var(--space-lg);
+    text-align: center;
+  }
+`;
+
+const WelcomeText = styled.div`
+  flex: 1;
+`;
+
+const WelcomeGreeting = styled.h1`
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 var(--space-sm) 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const WelcomeMessage = styled.p`
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+  line-height: 1.5;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+`;
+
+const WelcomeStats = styled.div`
+  display: flex;
+  gap: var(--space-xl);
+  
+  @media (max-width: 768px) {
+    gap: var(--space-lg);
+  }
+`;
+
+const WelcomeStat = styled.div`
+  text-align: center;
+`;
+
+const WelcomeStatValue = styled.div`
+  color: var(--accent-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+`;
+
+const WelcomeStatLabel = styled.div`
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+`;
+
 const StatsGrid = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -532,6 +634,18 @@ const Dashboard = () => {
   const { state, actions } = useAppContext();
   const navigate = useNavigate();
 
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  // Check if user is logged in
+  const isLoggedIn = state.user?.email && state.user?.email !== 'user@example.com';
+  const userName = state.user?.name || 'User';
+
   // --- Real-time Transactions Data ---
   const transactions = state.transactions || [];
   // Get last 7 days transactions
@@ -630,6 +744,40 @@ const Dashboard = () => {
         initial="initial"
         animate="animate"
       >
+        {/* Welcome Section */}
+        {isLoggedIn && (
+          <WelcomeSection
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <WelcomeContent>
+              <WelcomeText>
+                <WelcomeGreeting>
+                  {getGreeting()}, {userName}! 👋
+                </WelcomeGreeting>
+                <WelcomeMessage>
+                  Welcome back to your Budget Tracker. Here's your financial overview for today.
+                </WelcomeMessage>
+              </WelcomeText>
+              <WelcomeStats>
+                <WelcomeStat>
+                  <WelcomeStatValue>{state.transactions?.length || 0}</WelcomeStatValue>
+                  <WelcomeStatLabel>Total Transactions</WelcomeStatLabel>
+                </WelcomeStat>
+                <WelcomeStat>
+                  <WelcomeStatValue>{state.goals?.length || 0}</WelcomeStatValue>
+                  <WelcomeStatLabel>Active Goals</WelcomeStatLabel>
+                </WelcomeStat>
+                <WelcomeStat>
+                  <WelcomeStatValue>${(totalIncome7 - totalExpense7).toFixed(0)}</WelcomeStatValue>
+                  <WelcomeStatLabel>Net Balance</WelcomeStatLabel>
+                </WelcomeStat>
+              </WelcomeStats>
+            </WelcomeContent>
+          </WelcomeSection>
+        )}
+
         {/* Stats Cards */}
         <StatsGrid>
           <StatCard $gradient="linear-gradient(90deg, var(--primary), var(--success))">
